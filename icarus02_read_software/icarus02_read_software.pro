@@ -10,8 +10,11 @@ CONFIG -= app_bundle
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    Reader.cc
+    Reader.cc \
+    RawEvent.cc
 
 HEADERS += \
     Reader.hh \
-    ConfigHandler.hh
+    ConfigHandler.hh \
+    EventHandler.hh \
+    RawEvent.hh

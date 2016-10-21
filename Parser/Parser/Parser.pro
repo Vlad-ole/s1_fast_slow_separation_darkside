@@ -9,6 +9,23 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    RawEvent.cpp \
+    Reader.cc
 
 LIBS += -lz
+
+HEADERS += \
+    RawEvent.hh \
+    Reader.hh \
+    Message.hh \
+    MessageHandler.hh \
+    VParameterNode.hh \
+    ConfigHandler.hh \
+    ParameterList.hh \
+    Parameter.hh \
+    ConfigFunctor.hh \
+    EventHandler.hh \
+    Event.hh \
+    phrase.hh \
+    EventData.hh

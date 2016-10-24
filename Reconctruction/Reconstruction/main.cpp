@@ -6,15 +6,25 @@
 #include <sstream>
 #include <iomanip>
 
+//#include "TF1.h"
+//#include "TGraph.h"
+//#include "TFile.h"
+//#include "TRandom.h"
+//#include "TMath.h"
+//#include "TObjArray.h"
+//#include "TGraphErrors.h"
+//#include "TTree.h"
+//#include "TCanvas.h"
+
 using namespace std;
 
-int main(int argc, char *argv[])
+int main_tmp2(int argc, char *argv[])
 {
 
     const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am/";
     const int run_id = 6064;
 
-    for(int file_i = 0; file_i < 1; file_i++)
+    for(int file_i = 0; file_i < 2; file_i++)
     {
         ostringstream f_oss;
         f_oss << dir_name << "Run" << setfill('0') << setw(6) << run_id << "_event" << setfill('0') << setw(7) << file_i << ".out";
@@ -40,13 +50,10 @@ int main(int argc, char *argv[])
         cout << "nchans = " << nchans << endl;
         cout << "nsamps = " << nsamps << endl;
 
-        vector<int> xv_ch0;//PMT
-        vector<int> xv_ch1;//SiPM 1st part
-        vector<int> xv_ch2;//SiPM 2nd part
+        vector<int> ch0_read;//PMT
+        vector<int> ch1_read;//SiPM 1st part
+        vector<int> ch2_read;//SiPM 2nd part
 
-        vector<int> ch0_read;
-        vector<int> ch1_read;
-        vector<int> ch2_read;
         ch0_read.resize(nsamps);
         ch1_read.resize(nsamps);
         ch2_read.resize(nsamps);
@@ -58,6 +65,9 @@ int main(int argc, char *argv[])
         input_file.close();
 
     }
+
+
+//    TTree tree("t1", "Parser tree");
 
     cout << endl << "all is ok" << endl;
     return 0;

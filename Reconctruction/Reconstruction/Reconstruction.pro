@@ -9,4 +9,7 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-SOURCES += main.cpp
+SOURCES += \
+    test_read_write.cpp \
+    main_.cpp \
+    main.cpp

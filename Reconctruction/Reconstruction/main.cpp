@@ -11,39 +11,53 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 
-    ostringstream f_oss;
-    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run006064_event0000000.out";
-//    f_oss << dir_name << "Run" << setfill('0') << setw(6) << 0 << "_event" << setfill('0') << setw(7) << 1 << ".out";
-//    cout << f_oss.str() << endl << endl;
+    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am/";
+    const int run_id = 6064;
 
-    ifstream input_file;
-    input_file.open(dir_name.c_str(), ios::binary);
-
-    cout << "input_file.is_open() = " << input_file.is_open() << endl;
-
-    vector<int> xv_ch0;//PMT
-    vector<int> xv_ch1;//SiPM 1st part
-    vector<int> xv_ch2;//SiPM 2nd part
+    for(int file_i = 0; file_i < 1; file_i++)
+    {
+        ostringstream f_oss;
+        f_oss << dir_name << "Run" << setfill('0') << setw(6) << run_id << "_event" << setfill('0') << setw(7) << file_i << ".out";
+        cout << f_oss.str() << endl << endl;
 
 
+        ifstream input_file;
+        input_file.open(f_oss.str().c_str(), ios::binary);
 
-    int nchans;
-    int nsamps;
+        cout << "input_file.is_open() = " << input_file.is_open() << endl;
+        if(!input_file.is_open())
+        {
+            cout << "error in input_file.open" << endl;
+            return 1;
+        }
 
-    input_file.read( (char *) &nchans, sizeof(int) );
-    input_file.read( (char *) &nsamps, sizeof(int) );
+        int nchans = 0;
+        int nsamps = 0;
 
-//    xv_ch0.resize(nsamps);
-//    input_file.read( (char *) (&xv_ch0[0]),  nsamps * sizeof(int) );
+        input_file.read( (char *) &nchans, sizeof(int) );
+        input_file.read( (char *) &nsamps, sizeof(int) );
 
-    input_file.close();
+        cout << "nchans = " << nchans << endl;
+        cout << "nsamps = " << nsamps << endl;
 
-    cout << "nchans = " << nchans << endl;
-    cout << "nsamps = " << nsamps << endl;
+        vector<int> xv_ch0;//PMT
+        vector<int> xv_ch1;//SiPM 1st part
+        vector<int> xv_ch2;//SiPM 2nd part
 
-//    cout << "xv_ch0[0] = " << xv_ch0[0] << endl;
-//    cout << "xv_ch0[1] = " << xv_ch0[1] << endl;
+        vector<int> ch0_read;
+        vector<int> ch1_read;
+        vector<int> ch2_read;
+        ch0_read.resize(nsamps);
+        ch1_read.resize(nsamps);
+        ch2_read.resize(nsamps);
 
+        input_file.read( (char *) (&ch0_read[0]), nsamps * sizeof(int) );
+        input_file.read( (char *) (&ch1_read[0]), nsamps * sizeof(int) );
+        input_file.read( (char *) (&ch2_read[0]), nsamps * sizeof(int) );
+
+        input_file.close();
+
+    }
 
     cout << endl << "all is ok" << endl;
     return 0;

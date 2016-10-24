@@ -48,8 +48,12 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = ../Reconstruction/main.cpp 
-OBJECTS       = main.o
+SOURCES       = ../Reconstruction/test_read_write.cpp \
+		../Reconstruction/main_.cpp \
+		../Reconstruction/main.cpp 
+OBJECTS       = test_read_write.o \
+		main_.o \
+		main.o
 DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt5/mkspecs/common/unix.conf \
 		/usr/lib64/qt5/mkspecs/common/linux.conf \
@@ -106,7 +110,9 @@ DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt5/mkspecs/features/exceptions.prf \
 		/usr/lib64/qt5/mkspecs/features/yacc.prf \
 		/usr/lib64/qt5/mkspecs/features/lex.prf \
-		../Reconstruction/Reconstruction.pro  ../Reconstruction/main.cpp
+		../Reconstruction/Reconstruction.pro  ../Reconstruction/test_read_write.cpp \
+		../Reconstruction/main_.cpp \
+		../Reconstruction/main.cpp
 QMAKE_TARGET  = Reconstruction
 DESTDIR       = 
 TARGET        = Reconstruction
@@ -250,7 +256,7 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib64/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../Reconstruction/main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../Reconstruction/test_read_write.cpp ../Reconstruction/main_.cpp ../Reconstruction/main.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -294,6 +300,12 @@ compiler_lex_clean:
 compiler_clean: compiler_moc_predefs_clean 
 
 ####### Compile
+
+test_read_write.o: ../Reconstruction/test_read_write.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o test_read_write.o ../Reconstruction/test_read_write.cpp
+
+main_.o: ../Reconstruction/main_.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main_.o ../Reconstruction/main_.cpp
 
 main.o: ../Reconstruction/main.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../Reconstruction/main.cpp

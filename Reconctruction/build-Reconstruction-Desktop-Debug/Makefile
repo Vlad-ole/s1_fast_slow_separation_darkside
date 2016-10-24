@@ -15,7 +15,7 @@ CXX           = g++
 DEFINES       = -DQT_QML_DEBUG -DQT_CORE_LIB
 CFLAGS        = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -std=gnu++0x -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I../Reconstruction -I. -I../../../../root-6.06.08/include -isystem /usr/include/qt5 -isystem /usr/include/qt5/QtCore -I. -I/usr/lib64/qt5/mkspecs/linux-g++
+INCPATH       = -I../Reconstruction -I. -I../../../../root/include -isystem /usr/include/qt5 -isystem /usr/include/qt5/QtCore -I. -I/usr/lib64/qt5/mkspecs/linux-g++
 QMAKE         = /usr/bin/qmake-qt5
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -36,7 +36,7 @@ DISTNAME      = Reconstruction1.0.0
 DISTDIR = /home/darkside/Vlad_Programs/git_repositories/s1_fast_slow_separation_darkside/Reconctruction/build-Reconstruction-Desktop-Debug/.tmp/Reconstruction1.0.0
 LINK          = g++
 LFLAGS        = 
-LIBS          = $(SUBLIBS) -L/home/darkside/Vlad_Programs/root-6.06.08/lib -lCore -lCling -lASImage -lASImageGui -lcomplexDict -ldequeDict -lEG -lEve -lFitPanel -lFoam -lforward_listDict -lFTGL -lFumili -lGed -lGenetic -lGenVector -lGeomBuilder -lGeomPainter -lGeom -lGLEW -lGpad -lGraf3d -lGraf -lGuiBld -lGuiHtml -lGui -lGviz3d -lGX11 -lGX11TTF -lHbook -lHistPainter -lHist -lHtml -llistDict -lmap2Dict -lmapDict -lMathCore -lMatrix -lMemStat -lMinuit -lMLP -lmultimap2Dict -lmultimapDict -lMultiProc -lmultisetDict -lNet -lNew -lPhysics -lPostscript -lProofBench -lProofDraw -lProofPlayer -lProof -lQuadp -lRecorder -lRGL -lRint -lRIO -lRootAuth -lSessionViewer -lsetDict -lSmatrix -lSpectrumPainter -lSpectrum -lSPlot -lSQLIO -lSrvAuth -lThread -lTMVAGui -lTMVA -lTreePlayer -lTree -lTreeViewer -lunordered_mapDict -lunordered_multimapDict -lunordered_multisetDict -lunordered_setDict -lvalarrayDict -lvectorDict -lVMC -lX3d -lXMLIO -lQt5Core -lpthread 
+LIBS          = $(SUBLIBS) -L/home/darkside/Vlad_Programs/root/lib -lASImageGui -lASImage -lCintex -lCint -lcomplexDict -lCore -ldequeDict -lEG -lEve -lFitPanel -lFoam -lFTGL -lFumili -lGed -lGenetic -lGenVector -lGeomBuilder -lGeomPainter -lGeom -lGLEW -lGpad -lGraf3d -lGraf -lGuiBld -lGuiHtml -lGui -lGviz3d -lGX11 -lGX11TTF -lHbook -lHistPainter -lHist -lHtml -llistDict -lmap2Dict -lmapDict -lMathCore -lMatrix -lMemStat -lminicern -lMinuit -lMLP -lmultimap2Dict -lmultimapDict -lmultisetDict -lNet -lNew -lPhysics -lPostscript -lProofBench -lProofDraw -lProofPlayer -lProof -lQuadp -lRecorder -lReflexDict -lReflex -lRGL -lRint -lRIO -lRootAuth -lSessionViewer -lsetDict -lSmatrix -lSpectrumPainter -lSpectrum -lSPlot -lSQLIO -lSrvAuth -lThread -lTMVA -lTreePlayer -lTree -lTreeViewer -lvalarrayDict -lvectorDict -lVMC -lX3d -lXMLIO -lQt5Core -lpthread 
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -48,14 +48,8 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = ../Reconstruction/test_read_write.cpp \
-		../Reconstruction/main_.cpp \
-		../Reconstruction/main.cpp \
-		../Reconstruction/test_link_libs.cpp 
-OBJECTS       = test_read_write.o \
-		main_.o \
-		main.o \
-		test_link_libs.o
+SOURCES       = ../Reconstruction/main.cpp 
+OBJECTS       = main.o
 DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt5/mkspecs/common/unix.conf \
 		/usr/lib64/qt5/mkspecs/common/linux.conf \
@@ -112,10 +106,7 @@ DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt5/mkspecs/features/exceptions.prf \
 		/usr/lib64/qt5/mkspecs/features/yacc.prf \
 		/usr/lib64/qt5/mkspecs/features/lex.prf \
-		../Reconstruction/Reconstruction.pro  ../Reconstruction/test_read_write.cpp \
-		../Reconstruction/main_.cpp \
-		../Reconstruction/main.cpp \
-		../Reconstruction/test_link_libs.cpp
+		../Reconstruction/Reconstruction.pro  ../Reconstruction/main.cpp
 QMAKE_TARGET  = Reconstruction
 DESTDIR       = 
 TARGET        = Reconstruction
@@ -259,7 +250,7 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib64/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../Reconstruction/test_read_write.cpp ../Reconstruction/main_.cpp ../Reconstruction/main.cpp ../Reconstruction/test_link_libs.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../Reconstruction/main.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -304,17 +295,80 @@ compiler_clean: compiler_moc_predefs_clean
 
 ####### Compile
 
-test_read_write.o: ../Reconstruction/test_read_write.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o test_read_write.o ../Reconstruction/test_read_write.cpp
-
-main_.o: ../Reconstruction/main_.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main_.o ../Reconstruction/main_.cpp
-
-main.o: ../Reconstruction/main.cpp 
+main.o: ../Reconstruction/main.cpp ../../../../root/include/TF1.h \
+		../../../../root/include/TFormula.h \
+		../../../../root/include/TNamed.h \
+		../../../../root/include/TObject.h \
+		../../../../root/include/Rtypes.h \
+		../../../../root/include/RConfig.h \
+		../../../../root/include/RVersion.h \
+		../../../../root/include/DllImport.h \
+		../../../../root/include/Rtypeinfo.h \
+		../../../../root/include/snprintf.h \
+		../../../../root/include/strlcpy.h \
+		../../../../root/include/TGenericClassInfo.h \
+		../../../../root/include/TSchemaHelper.h \
+		../../../../root/include/TStorage.h \
+		../../../../root/include/TVersionCheck.h \
+		../../../../root/include/Riosfwd.h \
+		../../../../root/include/TBuffer.h \
+		../../../../root/include/TString.h \
+		../../../../root/include/TMathBase.h \
+		../../../../root/include/TBits.h \
+		../../../../root/include/TObjArray.h \
+		../../../../root/include/TSeqCollection.h \
+		../../../../root/include/TCollection.h \
+		../../../../root/include/TIterator.h \
+		../../../../root/include/TAttLine.h \
+		../../../../root/include/TAttFill.h \
+		../../../../root/include/TAttMarker.h \
+		../../../../root/include/Math/ParamFunctor.h \
+		../../../../root/include/TGraph.h \
+		../../../../root/include/TVectorFfwd.h \
+		../../../../root/include/TVectorDfwd.h \
+		../../../../root/include/TFitResultPtr.h \
+		../../../../root/include/TFile.h \
+		../../../../root/include/TDirectoryFile.h \
+		../../../../root/include/TDirectory.h \
+		../../../../root/include/TList.h \
+		../../../../root/include/TDatime.h \
+		../../../../root/include/TUUID.h \
+		../../../../root/include/TMap.h \
+		../../../../root/include/THashTable.h \
+		../../../../root/include/TUrl.h \
+		../../../../root/include/TRandom.h \
+		../../../../root/include/TMath.h \
+		../../../../root/include/TError.h \
+		../../../../root/include/TGraphErrors.h \
+		../../../../root/include/TTree.h \
+		../../../../root/include/TBranch.h \
+		../../../../root/include/TDataType.h \
+		../../../../root/include/TDictionary.h \
+		../../../../root/include/Property.h \
+		../../../../root/include/ESTLType.h \
+		../../../../root/include/TArrayD.h \
+		../../../../root/include/TArray.h \
+		../../../../root/include/TArrayI.h \
+		../../../../root/include/TClass.h \
+		../../../../root/include/TObjString.h \
+		../../../../root/include/ThreadLocalStorage.h \
+		../../../../root/include/RConfigure.h \
+		../../../../root/include/TVirtualTreePlayer.h \
+		../../../../root/include/TCanvas.h \
+		../../../../root/include/TPad.h \
+		../../../../root/include/TVirtualPad.h \
+		../../../../root/include/TAttPad.h \
+		../../../../root/include/TVirtualX.h \
+		../../../../root/include/TAttText.h \
+		../../../../root/include/GuiTypes.h \
+		../../../../root/include/Buttons.h \
+		../../../../root/include/TQObject.h \
+		../../../../root/include/TQClass.h \
+		../../../../root/include/TAttBBox2D.h \
+		../../../../root/include/TPoint.h \
+		../../../../root/include/TAttCanvas.h \
+		../../../../root/include/TCanvasImp.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../Reconstruction/main.cpp
-
-test_link_libs.o: ../Reconstruction/test_link_libs.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o test_link_libs.o ../Reconstruction/test_link_libs.cpp
 
 ####### Install
 

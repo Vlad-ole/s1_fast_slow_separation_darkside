@@ -7,7 +7,7 @@ vector< vector<int> > Get_data(string file_name)
     ifstream input_file;
     input_file.open(file_name.c_str(), ios::binary);
 
-    cout << "input_file.is_open() = " << input_file.is_open() << endl;
+//    cout << "input_file.is_open() = " << input_file.is_open() << endl;
     if(!input_file.is_open())
     {
         cout << "error in input_file.open" << endl;
@@ -20,8 +20,8 @@ vector< vector<int> > Get_data(string file_name)
     input_file.read( (char *) &nchans, sizeof(int) );
     input_file.read( (char *) &nsamps, sizeof(int) );
 
-    cout << "nchans = " << nchans << endl;
-    cout << "nsamps = " << nsamps << endl;
+//    cout << "nchans = " << nchans << endl;
+//    cout << "nsamps = " << nsamps << endl;
 
     vector<int> ch0_read;//PMT
     vector<int> ch1_read;//SiPM 1st part

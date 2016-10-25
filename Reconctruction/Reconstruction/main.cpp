@@ -38,22 +38,25 @@ int main(int argc, char *argv[])
     vector<int> xv;
     bool is_first_event = true;
 
-    for(int file_i = 0; file_i < 10; file_i++)
+    for(int file_i = 0; file_i < 300; file_i++)
     {
         //create file name to read binary file
         ostringstream f_oss;
         f_oss << dir_name << "Run" << setfill('0') << setw(6) << run_id << "_event" << setfill('0') << setw(7) << file_i << ".out";
-        cout << f_oss.str() << endl;
-
-        //crerate file name to write root tree
-        ostringstream file_tree_oss;
-        file_tree_oss << trees_dir << "Run" << setfill('0') << setw(6) << run_id << "_event" << setfill('0') << setw(7) << file_i << ".root";
-        TFile f_tree(file_tree_oss.str().c_str(), "RECREATE");
-        TTree tree("t1", "Parser tree");
+        if (file_i % 100 == 0) cout << f_oss.str() << endl;
 
         //read data from binary file
         vector< vector<int> > data = Get_data( f_oss.str() );
         const int nsamps = data[0].size();
+        if(data[0].size() == 0 || data[1].size() == 0 || data[2].size() == 0)
+        {
+            cout << "Incorrect binary file! event_id = " << file_i << endl;
+            cout << "data[0].size() = " << data[0].size() << endl;
+            cout << "data[1].size() = " << data[1].size() << endl;
+            cout << "data[2].size() = " << data[2].size() << endl;
+            continue;
+        }
+
         if(is_first_event)
         {
             xv.reserve(nsamps);
@@ -62,6 +65,7 @@ int main(int argc, char *argv[])
             {
                 xv[j] = j * time_scale;
             }
+            cout << "xv was set" << endl;
         }
         vector<double> xv_double;
         xv_double.resize(nsamps);
@@ -70,6 +74,12 @@ int main(int argc, char *argv[])
         //caculate derivative
         vector<double> ch1_der = Get_derivative(data[1], der_param);
         vector<double> ch2_der = Get_derivative(data[2], der_param);
+
+        //crerate file name to write root tree
+        ostringstream file_tree_oss;
+        file_tree_oss << trees_dir << "Run" << setfill('0') << setw(6) << run_id << "_event" << setfill('0') << setw(7) << file_i << ".root";
+        TFile f_tree(file_tree_oss.str().c_str(), "RECREATE");
+        TTree tree("t1", "Parser tree");
 
         //set variables to save in tree
         double integral_ch1, integral_ch2;
@@ -87,8 +97,8 @@ int main(int argc, char *argv[])
         integral_ch1 = Get_integral(data[1], baseline_ch1, time_scale);
         integral_ch2 = Get_integral(data[2], baseline_ch2, time_scale);
 
-        cout << "integral_ch1 = " << integral_ch1 << "; baseline_ch1 = " << baseline_ch1 << endl;
-        cout << "integral_ch2 = " << integral_ch2 << "; baseline_c21 = " << baseline_ch2 << endl;
+//        cout << "integral_ch1 = " << integral_ch1 << "; baseline_ch1 = " << baseline_ch1 << endl;
+//        cout << "integral_ch2 = " << integral_ch2 << "; baseline_c21 = " << baseline_ch2 << endl;
 
 
         //add graphs to canvas
@@ -121,7 +131,7 @@ int main(int argc, char *argv[])
         tree.Fill();
         tree.Write();
 
-        cout << endl;
+//        cout << endl;
     }
 
 

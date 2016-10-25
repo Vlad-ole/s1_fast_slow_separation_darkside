@@ -14,7 +14,7 @@ void ReadTree()
 
     TChain chain("t1");// name of the tree is the argument
     //const int n_max = 22426; //Am
-    const int n_max = 10; //for tests
+    const int n_max = 5000; //for tests
     for(int i = 0; i < n_max; i++)
     {
         ostringstream file_tree_oss;
@@ -34,10 +34,11 @@ void ReadTree()
     chain.SetBranchAddress("baseline_ch2", &baseline_ch2);
 
 
-    TCut total_cut = "";
+     TCut total_cut = "integral_ch2 > -50000 && integral_ch2 < 50000";
+//    TCut total_cut = "";
 
     chain.SetMarkerStyle(4);
-    chain.Draw("baseline_ch2", total_cut);
+    chain.Draw("integral_ch2", total_cut);
 
 
 //    for (int i = 0; i < chain.GetEntries() ; ++i)

@@ -15,7 +15,7 @@ CXX           = g++
 DEFINES       = -DQT_NO_DEBUG -DQT_CORE_LIB
 CFLAGS        = -pipe -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic -O2 -std=gnu++0x -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I../Reconstruction -I. -I../../../../root-6.06.08/include -isystem /usr/include/qt5 -isystem /usr/include/qt5/QtCore -I. -I/usr/lib64/qt5/mkspecs/linux-g++
+INCPATH       = -I../Reconstruction -I. -I../../../../root/include -isystem /usr/include/qt5 -isystem /usr/include/qt5/QtCore -I. -I/usr/lib64/qt5/mkspecs/linux-g++
 QMAKE         = /usr/bin/qmake-qt5
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -36,7 +36,7 @@ DISTNAME      = Reconstruction1.0.0
 DISTDIR = /home/darkside/Vlad_Programs/git_repositories/s1_fast_slow_separation_darkside/Reconctruction/build-Reconstruction-Desktop-Release/.tmp/Reconstruction1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-O1 -Wl,-z,relro
-LIBS          = $(SUBLIBS) -L/home/darkside/Vlad_Programs/root-6.06.08/lib -lCore -lASImage -lQt5Core -lpthread 
+LIBS          = $(SUBLIBS) -L/home/darkside/Vlad_Programs/root/lib -lASImageGui -lASImage -lCintex -lCint -lcomplexDict -lCore -ldequeDict -lEG -lEve -lFitPanel -lFoam -lFTGL -lFumili -lGed -lGenetic -lGenVector -lGeomBuilder -lGeomPainter -lGeom -lGLEW -lGpad -lGraf3d -lGraf -lGuiBld -lGuiHtml -lGui -lGviz3d -lGX11 -lGX11TTF -lHbook -lHistPainter -lHist -lHtml -llistDict -lmap2Dict -lmapDict -lMathCore -lMatrix -lMemStat -lminicern -lMinuit -lMLP -lmultimap2Dict -lmultimapDict -lmultisetDict -lNet -lNew -lPhysics -lPostscript -lProofBench -lProofDraw -lProofPlayer -lProof -lQuadp -lRecorder -lReflexDict -lReflex -lRGL -lRint -lRIO -lRootAuth -lSessionViewer -lsetDict -lSmatrix -lSpectrumPainter -lSpectrum -lSPlot -lSQLIO -lSrvAuth -lThread -lTMVA -lTreePlayer -lTree -lTreeViewer -lvalarrayDict -lvectorDict -lVMC -lX3d -lXMLIO -lQt5Core -lpthread 
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -48,12 +48,12 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = ../Reconstruction/test_read_write.cpp \
-		../Reconstruction/main_.cpp \
-		../Reconstruction/main.cpp 
-OBJECTS       = test_read_write.o \
-		main_.o \
-		main.o
+SOURCES       = ../Reconstruction/main.cpp \
+		../Reconstruction/read_file.cpp \
+		../Reconstruction/derivative.cpp 
+OBJECTS       = main.o \
+		read_file.o \
+		derivative.o
 DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt5/mkspecs/common/unix.conf \
 		/usr/lib64/qt5/mkspecs/common/linux.conf \
@@ -109,9 +109,10 @@ DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt5/mkspecs/features/exceptions.prf \
 		/usr/lib64/qt5/mkspecs/features/yacc.prf \
 		/usr/lib64/qt5/mkspecs/features/lex.prf \
-		../Reconstruction/Reconstruction.pro  ../Reconstruction/test_read_write.cpp \
-		../Reconstruction/main_.cpp \
-		../Reconstruction/main.cpp
+		../Reconstruction/Reconstruction.pro ../Reconstruction/read_file.h \
+		../Reconstruction/derivative.h ../Reconstruction/main.cpp \
+		../Reconstruction/read_file.cpp \
+		../Reconstruction/derivative.cpp
 QMAKE_TARGET  = Reconstruction
 DESTDIR       = 
 TARGET        = Reconstruction
@@ -253,7 +254,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib64/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../Reconstruction/test_read_write.cpp ../Reconstruction/main_.cpp ../Reconstruction/main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../Reconstruction/read_file.h ../Reconstruction/derivative.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../Reconstruction/main.cpp ../Reconstruction/read_file.cpp ../Reconstruction/derivative.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -298,95 +300,88 @@ compiler_clean: compiler_moc_predefs_clean
 
 ####### Compile
 
-test_read_write.o: ../Reconstruction/test_read_write.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o test_read_write.o ../Reconstruction/test_read_write.cpp
-
-main_.o: ../Reconstruction/main_.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main_.o ../Reconstruction/main_.cpp
-
-main.o: ../Reconstruction/main.cpp ../../../../root-6.06.08/include/TF1.h \
-		../../../../root-6.06.08/include/RConfigure.h \
-		../../../../root-6.06.08/include/TFormula.h \
-		../../../../root-6.06.08/include/TNamed.h \
-		../../../../root-6.06.08/include/TObject.h \
-		../../../../root-6.06.08/include/Rtypes.h \
-		../../../../root-6.06.08/include/RtypesCore.h \
-		../../../../root-6.06.08/include/RConfig.h \
-		../../../../root-6.06.08/include/RVersion.h \
-		../../../../root-6.06.08/include/DllImport.h \
-		../../../../root-6.06.08/include/Rtypeinfo.h \
-		../../../../root-6.06.08/include/snprintf.h \
-		../../../../root-6.06.08/include/strlcpy.h \
-		../../../../root-6.06.08/include/TGenericClassInfo.h \
-		../../../../root-6.06.08/include/TSchemaHelper.h \
-		../../../../root-6.06.08/include/TStorage.h \
-		../../../../root-6.06.08/include/TVersionCheck.h \
-		../../../../root-6.06.08/include/Riosfwd.h \
-		../../../../root-6.06.08/include/TBuffer.h \
-		../../../../root-6.06.08/include/TString.h \
-		../../../../root-6.06.08/include/TMathBase.h \
-		../../../../root-6.06.08/include/RStringView.h \
-		../../../../root-6.06.08/include/RWrap_libcpp_string_view.h \
-		../../../../root-6.06.08/include/libcpp_string_view.h \
-		../../../../root-6.06.08/include/TBits.h \
-		../../../../root-6.06.08/include/TObjArray.h \
-		../../../../root-6.06.08/include/TSeqCollection.h \
-		../../../../root-6.06.08/include/TCollection.h \
-		../../../../root-6.06.08/include/TIterator.h \
-		../../../../root-6.06.08/include/TMethodCall.h \
-		../../../../root-6.06.08/include/TDictionary.h \
-		../../../../root-6.06.08/include/ESTLType.h \
-		../../../../root-6.06.08/include/TInterpreter.h \
-		../../../../root-6.06.08/include/TVirtualMutex.h \
-		../../../../root-6.06.08/include/TAttLine.h \
-		../../../../root-6.06.08/include/TAttFill.h \
-		../../../../root-6.06.08/include/TAttMarker.h \
-		../../../../root-6.06.08/include/Math/ParamFunctor.h \
-		../../../../root-6.06.08/include/TGraph.h \
-		../../../../root-6.06.08/include/TVectorFfwd.h \
-		../../../../root-6.06.08/include/TVectorDfwd.h \
-		../../../../root-6.06.08/include/TFitResultPtr.h \
-		../../../../root-6.06.08/include/TFile.h \
-		../../../../root-6.06.08/include/TDirectoryFile.h \
-		../../../../root-6.06.08/include/TDirectory.h \
-		../../../../root-6.06.08/include/TList.h \
-		../../../../root-6.06.08/include/TDatime.h \
-		../../../../root-6.06.08/include/TUUID.h \
-		../../../../root-6.06.08/include/TMap.h \
-		../../../../root-6.06.08/include/THashTable.h \
-		../../../../root-6.06.08/include/TUrl.h \
-		../../../../root-6.06.08/include/TRandom.h \
-		../../../../root-6.06.08/include/TMath.h \
-		../../../../root-6.06.08/include/TError.h \
-		../../../../root-6.06.08/include/TGraphErrors.h \
-		../../../../root-6.06.08/include/TTree.h \
-		../../../../root-6.06.08/include/TBranch.h \
-		../../../../root-6.06.08/include/TDataType.h \
-		../../../../root-6.06.08/include/TArrayD.h \
-		../../../../root-6.06.08/include/TArray.h \
-		../../../../root-6.06.08/include/TArrayI.h \
-		../../../../root-6.06.08/include/TClass.h \
-		../../../../root-6.06.08/include/TObjString.h \
-		../../../../root-6.06.08/include/ThreadLocalStorage.h \
-		../../../../root-6.06.08/include/TVirtualTreePlayer.h \
-		../../../../root-6.06.08/include/TCanvas.h \
-		../../../../root-6.06.08/include/TPad.h \
-		../../../../root-6.06.08/include/TVirtualPad.h \
-		../../../../root-6.06.08/include/TAttPad.h \
-		../../../../root-6.06.08/include/TVirtualX.h \
-		../../../../root-6.06.08/include/TAttText.h \
-		../../../../root-6.06.08/include/GuiTypes.h \
-		../../../../root-6.06.08/include/Buttons.h \
-		../../../../root-6.06.08/include/TQObject.h \
-		../../../../root-6.06.08/include/TQObjectEmitVA.h \
-		../../../../root-6.06.08/include/TQConnection.h \
-		../../../../root-6.06.08/include/Varargs.h \
-		../../../../root-6.06.08/include/TQClass.h \
-		../../../../root-6.06.08/include/TAttBBox2D.h \
-		../../../../root-6.06.08/include/TPoint.h \
-		../../../../root-6.06.08/include/TAttCanvas.h \
-		../../../../root-6.06.08/include/TCanvasImp.h
+main.o: ../Reconstruction/main.cpp ../../../../root/include/TF1.h \
+		../../../../root/include/TFormula.h \
+		../../../../root/include/TNamed.h \
+		../../../../root/include/TObject.h \
+		../../../../root/include/Rtypes.h \
+		../../../../root/include/RConfig.h \
+		../../../../root/include/RVersion.h \
+		../../../../root/include/DllImport.h \
+		../../../../root/include/Rtypeinfo.h \
+		../../../../root/include/snprintf.h \
+		../../../../root/include/strlcpy.h \
+		../../../../root/include/TGenericClassInfo.h \
+		../../../../root/include/TSchemaHelper.h \
+		../../../../root/include/TStorage.h \
+		../../../../root/include/TVersionCheck.h \
+		../../../../root/include/Riosfwd.h \
+		../../../../root/include/TBuffer.h \
+		../../../../root/include/TString.h \
+		../../../../root/include/TMathBase.h \
+		../../../../root/include/TBits.h \
+		../../../../root/include/TObjArray.h \
+		../../../../root/include/TSeqCollection.h \
+		../../../../root/include/TCollection.h \
+		../../../../root/include/TIterator.h \
+		../../../../root/include/TAttLine.h \
+		../../../../root/include/TAttFill.h \
+		../../../../root/include/TAttMarker.h \
+		../../../../root/include/Math/ParamFunctor.h \
+		../../../../root/include/TGraph.h \
+		../../../../root/include/TVectorFfwd.h \
+		../../../../root/include/TVectorDfwd.h \
+		../../../../root/include/TFitResultPtr.h \
+		../../../../root/include/TFile.h \
+		../../../../root/include/TDirectoryFile.h \
+		../../../../root/include/TDirectory.h \
+		../../../../root/include/TList.h \
+		../../../../root/include/TDatime.h \
+		../../../../root/include/TUUID.h \
+		../../../../root/include/TMap.h \
+		../../../../root/include/THashTable.h \
+		../../../../root/include/TUrl.h \
+		../../../../root/include/TRandom.h \
+		../../../../root/include/TMath.h \
+		../../../../root/include/TError.h \
+		../../../../root/include/TGraphErrors.h \
+		../../../../root/include/TTree.h \
+		../../../../root/include/TBranch.h \
+		../../../../root/include/TDataType.h \
+		../../../../root/include/TDictionary.h \
+		../../../../root/include/Property.h \
+		../../../../root/include/ESTLType.h \
+		../../../../root/include/TArrayD.h \
+		../../../../root/include/TArray.h \
+		../../../../root/include/TArrayI.h \
+		../../../../root/include/TClass.h \
+		../../../../root/include/TObjString.h \
+		../../../../root/include/ThreadLocalStorage.h \
+		../../../../root/include/RConfigure.h \
+		../../../../root/include/TVirtualTreePlayer.h \
+		../../../../root/include/TCanvas.h \
+		../../../../root/include/TPad.h \
+		../../../../root/include/TVirtualPad.h \
+		../../../../root/include/TAttPad.h \
+		../../../../root/include/TVirtualX.h \
+		../../../../root/include/TAttText.h \
+		../../../../root/include/GuiTypes.h \
+		../../../../root/include/Buttons.h \
+		../../../../root/include/TQObject.h \
+		../../../../root/include/TQClass.h \
+		../../../../root/include/TAttBBox2D.h \
+		../../../../root/include/TPoint.h \
+		../../../../root/include/TAttCanvas.h \
+		../../../../root/include/TCanvasImp.h \
+		../../../../root/include/TROOT.h \
+		../Reconstruction/read_file.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../Reconstruction/main.cpp
+
+read_file.o: ../Reconstruction/read_file.cpp ../Reconstruction/read_file.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o read_file.o ../Reconstruction/read_file.cpp
+
+derivative.o: ../Reconstruction/derivative.cpp ../Reconstruction/derivative.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o derivative.o ../Reconstruction/derivative.cpp
 
 ####### Install
 

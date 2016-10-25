@@ -17,44 +17,32 @@
 #include "TCanvas.h"
 #include "TROOT.h"
 
+#include "read_file.h"
+#include "derivative.h"
+
 using namespace std;
 
 int main(int argc, char *argv[])
 {
     gROOT->SetBatch(kTRUE);
 
-    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am/";
-    const string trees_dir = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees/";
-    const int run_id = 6064;
+    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe/";
+    const string trees_dir = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
+    const int run_id = 6061;
     bool is_first_event = true;
     const int time_scale = 4;//ns
     vector<int> xv;
+    const int der_param = 10; // points
 
-    for(int file_i = 0; file_i < 1; file_i++)
+    for(int file_i = 0; file_i < 10; file_i++)
     {
         ostringstream f_oss;
         f_oss << dir_name << "Run" << setfill('0') << setw(6) << run_id << "_event" << setfill('0') << setw(7) << file_i << ".out";
         cout << f_oss.str() << endl << endl;
 
+        vector< vector<int> > data = Get_data( f_oss.str() );
 
-        ifstream input_file;
-        input_file.open(f_oss.str().c_str(), ios::binary);
-
-        cout << "input_file.is_open() = " << input_file.is_open() << endl;
-        if(!input_file.is_open())
-        {
-            cout << "error in input_file.open" << endl;
-            return 1;
-        }
-
-        int nchans = 0;
-        int nsamps = 0;
-
-        input_file.read( (char *) &nchans, sizeof(int) );
-        input_file.read( (char *) &nsamps, sizeof(int) );
-
-        cout << "nchans = " << nchans << endl;
-        cout << "nsamps = " << nsamps << endl;
+        const int nsamps = data[0].size();
 
         if(is_first_event)
         {
@@ -66,19 +54,12 @@ int main(int argc, char *argv[])
             }
         }
 
-        vector<int> ch0_read;//PMT
-        vector<int> ch1_read;//SiPM 1st part
-        vector<int> ch2_read;//SiPM 2nd part
+        vector<double> xv_double;
+        xv_double.resize(nsamps);
+        for (int j = 0; j < nsamps; j++) xv_double[j] = xv[j]; //it is a stupid code, but TGraph don't have constructor TGraph(nsamp, int, double)
 
-        ch0_read.resize(nsamps);
-        ch1_read.resize(nsamps);
-        ch2_read.resize(nsamps);
-
-        input_file.read( (char *) (&ch0_read[0]), nsamps * sizeof(int) );
-        input_file.read( (char *) (&ch1_read[0]), nsamps * sizeof(int) );
-        input_file.read( (char *) (&ch2_read[0]), nsamps * sizeof(int) );
-
-        input_file.close();
+        vector<double> ch1_der = Get_derivative(data[1], der_param);
+        vector<double> ch2_der = Get_derivative(data[2], der_param);
 
 
         ostringstream file_tree_oss;
@@ -90,10 +71,25 @@ int main(int argc, char *argv[])
         canv.Divide(2, 2);
         tree.Branch("canvas_tr", "TCanvas", &canv);
 
-        TGraph graph_ch1(ch1_read.size(), &xv[0], &ch1_read[0]);
-        graph_ch1.SetTitle("original Chanel 1 (SiPM)");
+        TGraph graph_ch1(nsamps, &xv[0], &data[1][0]);
+        graph_ch1.SetTitle("original (Channel 1, SiPM)");
         canv.cd(1);
         graph_ch1.Draw();
+
+        TGraph graph_ch2(nsamps, &xv[0], &data[2][0]);
+        graph_ch2.SetTitle("original (Channel 2, SiPM)");
+        canv.cd(2);
+        graph_ch2.Draw();
+
+        TGraph graph_ch1_processing(nsamps, &xv_double[0], &ch1_der[0]);
+        graph_ch1_processing.SetTitle("derivative (Channel 1, SiPM)");
+        canv.cd(3);
+        graph_ch1_processing.Draw();
+
+        TGraph graph_ch2_processing(nsamps, &xv_double[0], &ch2_der[0]);
+        graph_ch2_processing.SetTitle("derivative (Channel 2, SiPM)");
+        canv.cd(4);
+        graph_ch2_processing.Draw();
 
         tree.Fill();
         tree.Write();

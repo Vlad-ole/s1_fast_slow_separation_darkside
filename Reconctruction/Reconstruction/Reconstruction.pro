@@ -10,7 +10,9 @@ CONFIG -= app_bundle
 TEMPLATE = app
 
 SOURCES += \
-    main.cpp
+    main.cpp \
+    read_file.cpp \
+    derivative.cpp
 
 INCLUDEPATH += "/home/darkside/Vlad_Programs/root/include"
 
@@ -94,3 +96,7 @@ LIBS += -L"/home/darkside/Vlad_Programs/root/lib" \
  -lVMC \
  -lX3d \
  -lXMLIO
+
+HEADERS += \
+    read_file.h \
+    derivative.h

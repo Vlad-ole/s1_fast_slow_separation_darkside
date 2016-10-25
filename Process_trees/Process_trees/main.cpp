@@ -2,9 +2,9 @@ void ReadTree()
 {
     gROOT->SetBatch(kTRUE); // it's really important to use this line if you save TCanvas in a tree!
 
-    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees/";
-    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_result.root";
-    const int run_id = 6064;
+    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
+    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_result.root";
+    const int run_id = 6061;
 
     TObjArray Hlist_gr(0);
     Hlist_gr.SetOwner(kTRUE);
@@ -14,7 +14,7 @@ void ReadTree()
 
     TChain chain("t1");// name of the tree is the argument
     //const int n_max = 22426; //Am
-    const int n_max = 1; //for tests
+    const int n_max = 10; //for tests
     for(int i = 0; i < n_max; i++)
     {
         ostringstream file_tree_oss;

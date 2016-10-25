@@ -12,7 +12,9 @@ TEMPLATE = app
 SOURCES += \
     main.cpp \
     read_file.cpp \
-    derivative.cpp
+    derivative.cpp \
+    baseline.cpp \
+    integral.cpp
 
 INCLUDEPATH += "/home/darkside/Vlad_Programs/root/include"
 
@@ -99,4 +101,6 @@ LIBS += -L"/home/darkside/Vlad_Programs/root/lib" \
 
 HEADERS += \
     read_file.h \
-    derivative.h
+    derivative.h \
+    baseline.h \
+    integral.h

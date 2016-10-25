@@ -50,10 +50,14 @@ OBJECTS_DIR   = ./
 
 SOURCES       = ../Reconstruction/main.cpp \
 		../Reconstruction/read_file.cpp \
-		../Reconstruction/derivative.cpp 
+		../Reconstruction/derivative.cpp \
+		../Reconstruction/baseline.cpp \
+		../Reconstruction/integral.cpp 
 OBJECTS       = main.o \
 		read_file.o \
-		derivative.o
+		derivative.o \
+		baseline.o \
+		integral.o
 DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt5/mkspecs/common/unix.conf \
 		/usr/lib64/qt5/mkspecs/common/linux.conf \
@@ -110,9 +114,13 @@ DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt5/mkspecs/features/yacc.prf \
 		/usr/lib64/qt5/mkspecs/features/lex.prf \
 		../Reconstruction/Reconstruction.pro ../Reconstruction/read_file.h \
-		../Reconstruction/derivative.h ../Reconstruction/main.cpp \
+		../Reconstruction/derivative.h \
+		../Reconstruction/baseline.h \
+		../Reconstruction/integral.h ../Reconstruction/main.cpp \
 		../Reconstruction/read_file.cpp \
-		../Reconstruction/derivative.cpp
+		../Reconstruction/derivative.cpp \
+		../Reconstruction/baseline.cpp \
+		../Reconstruction/integral.cpp
 QMAKE_TARGET  = Reconstruction
 DESTDIR       = 
 TARGET        = Reconstruction
@@ -254,8 +262,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib64/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../Reconstruction/read_file.h ../Reconstruction/derivative.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../Reconstruction/main.cpp ../Reconstruction/read_file.cpp ../Reconstruction/derivative.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../Reconstruction/read_file.h ../Reconstruction/derivative.h ../Reconstruction/baseline.h ../Reconstruction/integral.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../Reconstruction/main.cpp ../Reconstruction/read_file.cpp ../Reconstruction/derivative.cpp ../Reconstruction/baseline.cpp ../Reconstruction/integral.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -374,7 +382,10 @@ main.o: ../Reconstruction/main.cpp ../../../../root/include/TF1.h \
 		../../../../root/include/TAttCanvas.h \
 		../../../../root/include/TCanvasImp.h \
 		../../../../root/include/TROOT.h \
-		../Reconstruction/read_file.h
+		../Reconstruction/read_file.h \
+		../Reconstruction/derivative.h \
+		../Reconstruction/baseline.h \
+		../Reconstruction/integral.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../Reconstruction/main.cpp
 
 read_file.o: ../Reconstruction/read_file.cpp ../Reconstruction/read_file.h
@@ -382,6 +393,12 @@ read_file.o: ../Reconstruction/read_file.cpp ../Reconstruction/read_file.h
 
 derivative.o: ../Reconstruction/derivative.cpp ../Reconstruction/derivative.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o derivative.o ../Reconstruction/derivative.cpp
+
+baseline.o: ../Reconstruction/baseline.cpp ../Reconstruction/baseline.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o baseline.o ../Reconstruction/baseline.cpp
+
+integral.o: ../Reconstruction/integral.cpp ../Reconstruction/integral.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o integral.o ../Reconstruction/integral.cpp
 
 ####### Install
 

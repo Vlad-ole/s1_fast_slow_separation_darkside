@@ -1,6 +1,6 @@
 void ReadTree()
 {
-    gROOT->SetBatch(kTRUE); // it's really important to use this line if you save TCanvas in a tree!
+//    gROOT->SetBatch(kTRUE); // it's really important to use this line if you save TCanvas in a tree!
 
     string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
     string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_result.root";
@@ -24,22 +24,31 @@ void ReadTree()
 
     chain.SetBranchAddress("canvas_tr", &canv);
 
+    //set variables to read them from tree
+    double integral_ch1, integral_ch2;
+    double baseline_ch1, baseline_ch2;
 
-//    TCut total_cut = "";
+    chain.SetBranchAddress("integral_ch1", &integral_ch1);
+    chain.SetBranchAddress("integral_ch2", &integral_ch2);
+    chain.SetBranchAddress("baseline_ch1", &baseline_ch1);
+    chain.SetBranchAddress("baseline_ch2", &baseline_ch2);
 
-//    chain.SetMarkerStyle(4);
-//    chain.Draw("amp_par_br * tau_par_br", total_cut);
+
+    TCut total_cut = "";
+
+    chain.SetMarkerStyle(4);
+    chain.Draw("baseline_ch2", total_cut);
 
 
-    for (int i = 0; i < chain.GetEntries() ; ++i)
-    {
-        chain.GetEntry(i);
-        Hlist_gr.Add( canv->Clone() );
-    }
+//    for (int i = 0; i < chain.GetEntries() ; ++i)
+//    {
+//        chain.GetEntry(i);
+//        Hlist_gr.Add( canv->Clone() );
+//    }
 
-    TFile ofile_Hlist_gr(graph_name.c_str(), "RECREATE");
-    Hlist_gr.Write();
-    ofile_Hlist_gr.Close();
+//    TFile ofile_Hlist_gr(graph_name.c_str(), "RECREATE");
+//    Hlist_gr.Write();
+//    ofile_Hlist_gr.Close();
 
     cout << endl << "Root cern script: all is ok" << endl;
 

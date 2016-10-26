@@ -34,11 +34,15 @@ int main(int argc, char *argv[])
     const int run_id = 6061;
     const int time_scale = 4;//ns
     const int der_param = 10; // points
+    const double time_integral_from = 1950; // ns
+    const double time_integral_to = 1950 + 700; // ns
+    const double time_avr_baseline_to = 1600; // ns
 
+    //
     vector<int> xv;
     bool is_first_event = true;
 
-    for(int file_i = 0; file_i < 300; file_i++)
+    for(int file_i = 0; file_i < 1; file_i++)
     {
         //create file name to read binary file
         ostringstream f_oss;
@@ -48,7 +52,7 @@ int main(int argc, char *argv[])
         //read data from binary file
         vector< vector<int> > data = Get_data( f_oss.str() );
         const int nsamps = data[0].size();
-        if(data[0].size() == 0 || data[1].size() == 0 || data[2].size() == 0)
+        if(data[0].size() == 0 || data[1].size() == 0 || data[2].size() == 0)//some files can be empty. I do not know why
         {
             cout << "Incorrect binary file! event_id = " << file_i << endl;
             cout << "data[0].size() = " << data[0].size() << endl;
@@ -75,7 +79,7 @@ int main(int argc, char *argv[])
         vector<double> ch1_der = Get_derivative(data[1], der_param);
         vector<double> ch2_der = Get_derivative(data[2], der_param);
 
-        //crerate file name to write root tree
+        //create file name to write root tree
         ostringstream file_tree_oss;
         file_tree_oss << trees_dir << "Run" << setfill('0') << setw(6) << run_id << "_event" << setfill('0') << setw(7) << file_i << ".root";
         TFile f_tree(file_tree_oss.str().c_str(), "RECREATE");
@@ -84,21 +88,54 @@ int main(int argc, char *argv[])
         //set variables to save in tree
         double integral_ch1, integral_ch2;
         double baseline_ch1, baseline_ch2;
+        double max_abs_amp_ch1, max_abs_amp_ch2;
         tree.Branch("integral_ch1", &integral_ch1, "integral_ch1/D");
         tree.Branch("integral_ch2", &integral_ch2, "integral_ch2/D");
         tree.Branch("baseline_ch1", &baseline_ch1, "baseline_ch1/D");
         tree.Branch("baseline_ch2", &baseline_ch2, "baseline_ch2/D");
+        tree.Branch("max_abs_amp_ch1", &max_abs_amp_ch1, "max_abs_amp_ch1/D");
+        tree.Branch("max_abs_amp_ch2", &max_abs_amp_ch2, "max_abs_amp_ch2/D");
+
+        //just test. gererate test array
+        int point_start = 2000 / time_scale ;
+        int baseline_test = 3400;
+        int point_stop = 3000 / time_scale ;
+        int amp = 10;
+
+        for (int i = 0; i < data[1].size(); ++i)
+        {
+            if(i >= point_start && i < point_stop)
+            {
+                data[1][i] = baseline_test - amp;
+                data[2][i] = baseline_test - amp;
+            }
+            else
+            {
+                data[1][i] = baseline_test;
+                data[2][i] = baseline_test;
+            }
+        }
 
         //caculate baseline
-        baseline_ch1 = Get_baseline(data[1], 1600 / time_scale);
-        baseline_ch2 = Get_baseline(data[2], 1600 / time_scale);
+        baseline_ch1 = Get_baseline(data[1], (int)(time_avr_baseline_to / time_scale) );
+        baseline_ch2 = Get_baseline(data[2], (int)(time_avr_baseline_to / time_scale) );
+
+        max_abs_amp_ch1 = abs( *min_element(data[1].begin(), data[1].end()) - baseline_ch1 );
+        max_abs_amp_ch2 = abs( *min_element(data[2].begin(), data[2].end()) - baseline_ch2 );
+
+        cout << "max_abs_amp_ch1 = " << max_abs_amp_ch1 << endl;
+        cout << "max_abs_amp_ch2 = " << max_abs_amp_ch2 << endl;
+
+
 
         //caculate integral
-        integral_ch1 = Get_integral(data[1], baseline_ch1, time_scale);
-        integral_ch2 = Get_integral(data[2], baseline_ch2, time_scale);
+//        integral_ch1 = Get_integral(data[1], baseline_ch1, time_scale, time_integral_from, time_integral_to);
+//        integral_ch2 = Get_integral(data[2], baseline_ch2, time_scale, time_integral_from, time_integral_to);
+        integral_ch1 = Get_integral(data[1], baseline_ch1, time_scale, 1000, 4000);
+        integral_ch2 = Get_integral(data[2], baseline_ch2, time_scale, 2000, 3000);
 
-//        cout << "integral_ch1 = " << integral_ch1 << "; baseline_ch1 = " << baseline_ch1 << endl;
-//        cout << "integral_ch2 = " << integral_ch2 << "; baseline_c21 = " << baseline_ch2 << endl;
+        cout << "integral_ch1 = " << integral_ch1 << "; baseline_ch1 = " << baseline_ch1 << endl;
+        cout << "integral_ch2 = " << integral_ch2 << "; baseline_c21 = " << baseline_ch2 << endl;
 
 
         //add graphs to canvas

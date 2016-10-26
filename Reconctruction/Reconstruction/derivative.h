@@ -7,6 +7,6 @@
 
 using namespace std;
 
-vector<double> Get_derivative(vector<int>, const int der_param);
+vector<double> Get_derivative(const vector<int>, const int der_param);
 
 #endif // DERIVATIVE_H

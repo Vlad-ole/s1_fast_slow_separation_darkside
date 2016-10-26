@@ -1,6 +1,6 @@
 #include "derivative.h"
 
-vector<double> Get_derivative(vector<int> data_v, const int der_param)
+vector<double> Get_derivative(const vector<int> data_v, const int der_param)
 {
     vector<double> der_v;
     int nsamples = data_v.size();

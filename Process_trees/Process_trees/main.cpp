@@ -27,30 +27,55 @@ void ReadTree()
     //set variables to read them from tree
     double integral_ch1, integral_ch2;
     double baseline_ch1, baseline_ch2;
+    double max_abs_amp_ch1, max_abs_amp_ch2;
 
     chain.SetBranchAddress("integral_ch1", &integral_ch1);
     chain.SetBranchAddress("integral_ch2", &integral_ch2);
     chain.SetBranchAddress("baseline_ch1", &baseline_ch1);
     chain.SetBranchAddress("baseline_ch2", &baseline_ch2);
+    chain.SetBranchAddress("max_abs_amp_ch1", &max_abs_amp_ch1);
+    chain.SetBranchAddress("max_abs_amp_ch2", &max_abs_amp_ch2);
 
 
-     TCut total_cut = "integral_ch2 > -50000 && integral_ch2 < 50000";
-//    TCut total_cut = "";
+     //TCut total_cut = "integral_ch2 > -50000 && integral_ch2 < 50000";
+//    TCut total_cut = "max_abs_amp_ch2 > 9 && max_abs_amp_ch2 < 14";
+    TCut total_cut = "max_abs_amp_ch2 < 9";
 
     chain.SetMarkerStyle(4);
-    chain.Draw("integral_ch2", total_cut);
+
+//    chain.Draw("max_abs_amp_ch1>>h1(300,0,100)", total_cut);
+    chain.Draw("integral_ch2>>h2(500,-20000,5000)", total_cut);
+
+//   chain.Draw("integral_ch2>>h2(500,-20000,5000)", total_cut); // >>hsqrt(bins, min, max)
+//    chain.Draw("integral_ch1>>h1(500,-20000,5000)", total_cut);
+
+//   TH1F *h2 = (TH1F*)gDirectory->Get("h2");
+//   TH1F *h1 = (TH1F*)gDirectory->Get("h1");
+
+//   h1->SetFillStyle(3001);
+//   h2->SetFillStyle(3001);
 
 
-//    for (int i = 0; i < chain.GetEntries() ; ++i)
-//    {
-//        chain.GetEntry(i);
-//        Hlist_gr.Add( canv->Clone() );
-//    }
+//   h1->SetFillColor(kBlue);
+//   h2->SetFillColor(kRed);
 
-//    TFile ofile_Hlist_gr(graph_name.c_str(), "RECREATE");
-//    Hlist_gr.Write();
-//    ofile_Hlist_gr.Close();
 
-    cout << endl << "Root cern script: all is ok" << endl;
+//   h2->Draw();
+//   h1->Draw("same");
+
+//   for (int i = 0; i < chain.GetEntries() ; ++i)
+//   {
+//       chain.GetEntry(i);
+//       if(max_abs_amp_ch2 < 14)
+//       {
+//           Hlist_gr.Add( canv->Clone() );
+//       }
+//   }
+
+//   TFile ofile_Hlist_gr(graph_name.c_str(), "RECREATE");
+//   Hlist_gr.Write();
+//   ofile_Hlist_gr.Close();
+
+   cout << endl << "Root cern script: all is ok" << endl;
 
 }

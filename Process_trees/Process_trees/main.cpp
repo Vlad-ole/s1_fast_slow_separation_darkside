@@ -1,6 +1,6 @@
 void ReadTree()
 {
-//    gROOT->SetBatch(kTRUE); // it's really important to use this line if you save TCanvas in a tree!
+    gROOT->SetBatch(kTRUE); // it's really important to use this line if you save TCanvas in a tree!
 
     string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
     string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_result.root";
@@ -20,6 +20,8 @@ void ReadTree()
         ostringstream file_tree_oss;
         file_tree_oss << dir_name << "Run" << setfill('0') << setw(6) << run_id << "_event" << setfill('0') << setw(7) << i << ".root";
         chain.Add(file_tree_oss.str().c_str());
+
+        if(i % 100 == 0) cout << "event = " << i << endl;
     }
 
     chain.SetBranchAddress("canvas_tr", &canv);
@@ -39,12 +41,13 @@ void ReadTree()
 
      //TCut total_cut = "integral_ch2 > -50000 && integral_ch2 < 50000";
 //    TCut total_cut = "max_abs_amp_ch2 > 9 && max_abs_amp_ch2 < 14";
-    TCut total_cut = "max_abs_amp_ch2 < 9";
+//    TCut total_cut = "max_abs_amp_ch2 < 9";
+    TCut total_cut = "";
 
     chain.SetMarkerStyle(4);
 
 //    chain.Draw("max_abs_amp_ch1>>h1(300,0,100)", total_cut);
-    chain.Draw("integral_ch2>>h2(500,-20000,5000)", total_cut);
+    chain.Draw("integral_ch1>>h2(500,-40000,5000)", total_cut);
 
 //   chain.Draw("integral_ch2>>h2(500,-20000,5000)", total_cut); // >>hsqrt(bins, min, max)
 //    chain.Draw("integral_ch1>>h1(500,-20000,5000)", total_cut);
@@ -63,18 +66,18 @@ void ReadTree()
 //   h2->Draw();
 //   h1->Draw("same");
 
-//   for (int i = 0; i < chain.GetEntries() ; ++i)
-//   {
-//       chain.GetEntry(i);
-//       if(max_abs_amp_ch2 < 14)
-//       {
-//           Hlist_gr.Add( canv->Clone() );
-//       }
-//   }
+   for (int i = 0; i < chain.GetEntries() ; ++i)
+   {
+       chain.GetEntry(i);
+       if(integral_ch1 > 2000)
+       {
+           Hlist_gr.Add( canv->Clone() );
+       }
+   }
 
-//   TFile ofile_Hlist_gr(graph_name.c_str(), "RECREATE");
-//   Hlist_gr.Write();
-//   ofile_Hlist_gr.Close();
+   TFile ofile_Hlist_gr(graph_name.c_str(), "RECREATE");
+   Hlist_gr.Write();
+   ofile_Hlist_gr.Close();
 
    cout << endl << "Root cern script: all is ok" << endl;
 

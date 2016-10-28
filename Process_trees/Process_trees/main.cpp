@@ -14,7 +14,7 @@ void ReadTree()
 
     TChain chain("t1");// name of the tree is the argument
     //const int n_max = 22426; //Am
-    const int n_max = 10; //for tests
+    const int n_max = 1; //for tests
     for(int i = 0; i < n_max; i++)
     {
         ostringstream file_tree_oss;
@@ -66,6 +66,7 @@ void ReadTree()
 //   h2->Draw();
 //   h1->Draw("same");
 
+    cout << "chain.GetEntries() = " << chain.GetEntries() << endl;
    for (int i = 0; i < chain.GetEntries() ; ++i)
    {
        chain.GetEntry(i);

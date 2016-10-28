@@ -19,8 +19,8 @@ int main(int argc, char *argv[])
 {
     string s_output_file = "/home/darkside/Vlad_Programs/test.root";
 
-    const int events_per_file = 2;
-    const int n_events = 2;
+    const int events_per_file = 4;
+    const int n_events = 100;
     const int samp_per_event = 100;
 
     vector<double> xv;

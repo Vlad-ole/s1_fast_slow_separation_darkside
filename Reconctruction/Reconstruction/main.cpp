@@ -54,14 +54,15 @@ int main(int argc, char *argv[])
     const double time_integral_from = 1950; // ns
     const double time_integral_to = 1950 + 700; // ns
     const double time_avr_baseline_to = 1600; // ns
-    const int events_per_file = 1;
-    const int max_files = 500;
+    const int events_per_file = 100;
+    const int max_files = 100;
 
     //
     vector<int> xv;
     vector<double> xv_double;
     bool is_first_event = true;
-    TFile f_tree;
+    TFile* f_tree = NULL;
+    TTree* tree = NULL;
 
 
     for(int file_i = 0; file_i < max_files; file_i++)
@@ -111,36 +112,14 @@ int main(int argc, char *argv[])
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_calculate_der += get_time_delta(timespec_str_before, timespec_str_after);
 
-
-
         //create file name to write root tree
         ostringstream file_tree_oss;
         file_tree_oss << trees_dir << "Run" << setfill('0') << setw(6) << run_id << "_event" << setfill('0') << setw(7) << file_i << ".root";
-
-        clock_gettime(CLOCK_REALTIME, &timespec_str_before);
-        if(file_i % events_per_file == 0)
-        {
-            f_tree.Open(file_tree_oss.str().c_str(), "RECREATE");
-            //        f_tree.SetCompressionLevel(0); //0 - without compression (max speedof writing), 9 - max compress(max speed of reading)
-        }
-        clock_gettime(CLOCK_REALTIME, &timespec_str_after);
-        t_tree_init += get_time_delta(timespec_str_before, timespec_str_after);
-
-
-        TTree tree("t1", "Parser tree");
-
 
         //set variables to save in tree
         double integral_ch1, integral_ch2;
         double baseline_ch1, baseline_ch2;
         double max_abs_amp_ch1, max_abs_amp_ch2;
-        tree.Branch("integral_ch1", &integral_ch1, "integral_ch1/D");
-        tree.Branch("integral_ch2", &integral_ch2, "integral_ch2/D");
-        tree.Branch("baseline_ch1", &baseline_ch1, "baseline_ch1/D");
-        tree.Branch("baseline_ch2", &baseline_ch2, "baseline_ch2/D");
-        tree.Branch("max_abs_amp_ch1", &max_abs_amp_ch1, "max_abs_amp_ch1/D");
-        tree.Branch("max_abs_amp_ch2", &max_abs_amp_ch2, "max_abs_amp_ch2/D");
-
 
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
@@ -170,7 +149,7 @@ int main(int argc, char *argv[])
         //add graphs to canvas
         TCanvas canv("c", "c", 0, 0, 1900, 1000);
         canv.Divide(2, 2);
-        tree.Branch("canvas_tr", "TCanvas", &canv);
+
 
         //cd1
         TGraph graph_ch1(nsamps, &xv[0], &data[1][0]);
@@ -223,32 +202,60 @@ int main(int argc, char *argv[])
         t_tree_add_graphs += get_time_delta(timespec_str_before, timespec_str_after);
 
 
+        clock_gettime(CLOCK_REALTIME, &timespec_str_before);
+        if(file_i % events_per_file == 0)
+        {
+//            f_tree.Open(file_tree_oss.str().c_str(), "RECREATE");
+            //        f_tree.SetCompressionLevel(0); //0 - without compression (max speedof writing), 9 - max compress(max speed of reading)
+            f_tree = TFile::Open(file_tree_oss.str().c_str(), "RECREATE");
+            tree = new TTree("t1", "Parser tree");
+
+            tree->Branch("integral_ch1", &integral_ch1, "integral_ch1/D");
+            tree->Branch("integral_ch2", &integral_ch2, "integral_ch2/D");
+            tree->Branch("baseline_ch1", &baseline_ch1, "baseline_ch1/D");
+            tree->Branch("baseline_ch2", &baseline_ch2, "baseline_ch2/D");
+            tree->Branch("max_abs_amp_ch1", &max_abs_amp_ch1, "max_abs_amp_ch1/D");
+            tree->Branch("max_abs_amp_ch2", &max_abs_amp_ch2, "max_abs_amp_ch2/D");
+
+            tree->Branch("canvas_tr", "TCanvas", &canv);
+        }
+        clock_gettime(CLOCK_REALTIME, &timespec_str_after);
+        t_tree_init += get_time_delta(timespec_str_before, timespec_str_after);
+
+
         //save canvas and other parameters to tree
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
-        tree.Fill();
+        tree->Fill();
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_tree_fill += get_time_delta(timespec_str_before, timespec_str_after);
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
-        if(file_i % events_per_file == 0)
-        {
-            tree.Write(); //save only current tree
-//               f_tree.Write();//save list of trees
-        }
+        if(file_i % events_per_file == events_per_file-1) f_tree->Write();//save list of trees
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_tree_write += get_time_delta(timespec_str_before, timespec_str_after);
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
-        if(file_i % events_per_file == 0)
+        if(file_i % events_per_file == events_per_file-1)
         {
-            f_tree.Close();
-//            cout << "event_id = " << file_i << endl;
+            f_tree->Close();
+            delete f_tree;
+            f_tree = NULL;
+            tree = NULL;
         }
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_tree_close += get_time_delta(timespec_str_before, timespec_str_after);
 
 
 //        cout << endl;
+    }
+
+    if(f_tree)
+    {
+        f_tree->Write();
+        f_tree->Close();
+        delete f_tree;
+        f_tree = NULL;
+        tree = NULL;
     }
 
     clock_gettime(CLOCK_REALTIME, &timespec_str_total_after);

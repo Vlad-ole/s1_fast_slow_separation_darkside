@@ -5,7 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
-#include <time.h>  //Для clock_gettime
+#include <time.h>  //for clock_gettime
 
 #include "TF1.h"
 #include "TGraph.h"
@@ -17,6 +17,9 @@
 #include "TTree.h"
 #include "TCanvas.h"
 #include "TROOT.h"
+#include "TText.h"
+#include "TLatex.h"
+#include "TPaveText.h"
 
 #include "read_file.h"
 #include "derivative.h"
@@ -33,7 +36,7 @@ double get_time_delta(struct timespec timespec_str_before, struct timespec times
 int main(int argc, char *argv[])
 {
     struct timespec timespec_str_before, timespec_str_after, timespec_str_total_before, timespec_str_total_after;
-    double t_total, t_read_file;
+    double t_read_file;
     double t_calculate_der, t_calculate_baseline, t_calculate_integral, t_calculate_abs_amp;
     double t_tree_init, t_tree_add_graphs, t_tree_fill, t_tree_write, t_tree_close;
 
@@ -51,14 +54,16 @@ int main(int argc, char *argv[])
     const double time_integral_from = 1950; // ns
     const double time_integral_to = 1950 + 700; // ns
     const double time_avr_baseline_to = 1600; // ns
+    const int events_per_file = 1;
+    const int max_files = 500;
 
     //
     vector<int> xv;
     vector<double> xv_double;
     bool is_first_event = true;
+    TFile f_tree;
 
 
-    const int max_files = 100;
     for(int file_i = 0; file_i < max_files; file_i++)
     {
 
@@ -107,12 +112,21 @@ int main(int argc, char *argv[])
         t_calculate_der += get_time_delta(timespec_str_before, timespec_str_after);
 
 
-        clock_gettime(CLOCK_REALTIME, &timespec_str_before);
+
         //create file name to write root tree
         ostringstream file_tree_oss;
         file_tree_oss << trees_dir << "Run" << setfill('0') << setw(6) << run_id << "_event" << setfill('0') << setw(7) << file_i << ".root";
-        TFile f_tree(file_tree_oss.str().c_str(), "RECREATE");
-        f_tree.SetCompressionLevel(0); //0 - without compression (max speedof writing), 9 - max compress(max speed of reading)
+
+        clock_gettime(CLOCK_REALTIME, &timespec_str_before);
+        if(file_i % events_per_file == 0)
+        {
+            f_tree.Open(file_tree_oss.str().c_str(), "RECREATE");
+            //        f_tree.SetCompressionLevel(0); //0 - without compression (max speedof writing), 9 - max compress(max speed of reading)
+        }
+        clock_gettime(CLOCK_REALTIME, &timespec_str_after);
+        t_tree_init += get_time_delta(timespec_str_before, timespec_str_after);
+
+
         TTree tree("t1", "Parser tree");
 
 
@@ -126,8 +140,7 @@ int main(int argc, char *argv[])
         tree.Branch("baseline_ch2", &baseline_ch2, "baseline_ch2/D");
         tree.Branch("max_abs_amp_ch1", &max_abs_amp_ch1, "max_abs_amp_ch1/D");
         tree.Branch("max_abs_amp_ch2", &max_abs_amp_ch2, "max_abs_amp_ch2/D");
-        clock_gettime(CLOCK_REALTIME, &timespec_str_after);
-        t_tree_init += get_time_delta(timespec_str_before, timespec_str_after);
+
 
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
@@ -159,21 +172,48 @@ int main(int argc, char *argv[])
         canv.Divide(2, 2);
         tree.Branch("canvas_tr", "TCanvas", &canv);
 
+        //cd1
         TGraph graph_ch1(nsamps, &xv[0], &data[1][0]);
         graph_ch1.SetTitle("original (Channel 1, SiPM)");
         canv.cd(1);
-        graph_ch1.Draw();
+        graph_ch1.Draw("apl");
 
+        TF1 tf1_baseline_ch1("tf1_baseline_ch1","[0]",0,time_scale*nsamps);
+        tf1_baseline_ch1.SetParameter(0,baseline_ch1);
+        tf1_baseline_ch1.Draw("same");
+
+        string text_cd1_integral = "integral = " + to_string(integral_ch1);
+        string text_cd1_baseline = "baseline = " + to_string(baseline_ch1);
+        TPaveText pt_cd1(0.8,0.8,1,1,"nbNDC");
+        pt_cd1.AddText(text_cd1_integral.c_str());
+        pt_cd1.AddText(text_cd1_baseline.c_str());
+        pt_cd1.Draw();
+
+        //cd2
         TGraph graph_ch2(nsamps, &xv[0], &data[2][0]);
         graph_ch2.SetTitle("original (Channel 2, SiPM)");
         canv.cd(2);
         graph_ch2.Draw();
 
+        TF1 tf1_baseline_ch2("tf1_baseline_ch2","[0]",0,time_scale*nsamps);
+        tf1_baseline_ch2.SetParameter(0,baseline_ch2);
+        tf1_baseline_ch2.Draw("same");
+
+        string text_cd2_integral = "integral = " + to_string(integral_ch2);
+        string text_cd2_baseline = "baseline = " + to_string(baseline_ch2);
+        TPaveText pt_cd2(0.8,0.8,1,1,"nbNDC");
+        pt_cd2.AddText(text_cd2_integral.c_str());
+        pt_cd2.AddText(text_cd2_baseline.c_str());
+        pt_cd2.Draw();
+
+
+        //cd3
         TGraph graph_ch1_processing(nsamps, &xv_double[0], &ch1_der[0]);
         graph_ch1_processing.SetTitle("derivative (Channel 1, SiPM)");
         canv.cd(3);
         graph_ch1_processing.Draw();
 
+        //cd4
         TGraph graph_ch2_processing(nsamps, &xv_double[0], &ch2_der[0]);
         graph_ch2_processing.SetTitle("derivative (Channel 2, SiPM)");
         canv.cd(4);
@@ -190,12 +230,20 @@ int main(int argc, char *argv[])
         t_tree_fill += get_time_delta(timespec_str_before, timespec_str_after);
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
-        tree.Write();
+        if(file_i % events_per_file == 0)
+        {
+            tree.Write(); //save only current tree
+//               f_tree.Write();//save list of trees
+        }
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_tree_write += get_time_delta(timespec_str_before, timespec_str_after);
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
-        f_tree.Close();
+        if(file_i % events_per_file == 0)
+        {
+            f_tree.Close();
+//            cout << "event_id = " << file_i << endl;
+        }
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_tree_close += get_time_delta(timespec_str_before, timespec_str_after);
 
@@ -216,8 +264,6 @@ int main(int argc, char *argv[])
     cout << "t_tree_fill / file [ms] = " << t_tree_fill / max_files * 1000 << endl;
     cout << "t_tree_write / file [ms] = " << t_tree_write / max_files * 1000 << endl;
     cout << "t_tree_close / file [ms] = " << t_tree_close / max_files * 1000 << endl;
-
-
 
 
     cout << endl << "all is ok" << endl;

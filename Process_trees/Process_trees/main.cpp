@@ -14,7 +14,7 @@ void ReadTree()
 
     TChain chain("t1");// name of the tree is the argument
     //const int n_max = 22426; //Am
-    const int n_max = 5000; //for tests
+    const int n_max = 10; //for tests
     for(int i = 0; i < n_max; i++)
     {
         ostringstream file_tree_oss;
@@ -69,7 +69,7 @@ void ReadTree()
    for (int i = 0; i < chain.GetEntries() ; ++i)
    {
        chain.GetEntry(i);
-       if(integral_ch1 > 2000)
+//       if(integral_ch1 > 2000)
        {
            Hlist_gr.Add( canv->Clone() );
        }

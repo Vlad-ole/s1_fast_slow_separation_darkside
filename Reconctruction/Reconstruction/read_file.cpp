@@ -10,7 +10,7 @@ vector< vector<int> > Get_data(string file_name)
 //    cout << "input_file.is_open() = " << input_file.is_open() << endl;
     if(!input_file.is_open())
     {
-        cout << "error in input_file.open" << endl;
+        cout << "error in file.open = " << file_name << endl;
         exit(1);
     }
 

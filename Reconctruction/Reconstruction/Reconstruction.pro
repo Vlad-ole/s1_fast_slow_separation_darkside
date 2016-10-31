@@ -14,7 +14,9 @@ SOURCES += \
     read_file.cpp \
     derivative.cpp \
     baseline.cpp \
-    integral.cpp
+    integral.cpp \
+    fill_canvas.cpp \
+    fft.cpp
 
 INCLUDEPATH += "/home/darkside/Vlad_Programs/root/include"
 
@@ -103,4 +105,6 @@ HEADERS += \
     read_file.h \
     derivative.h \
     baseline.h \
-    integral.h
+    integral.h \
+    fill_canvas.h \
+    fft.h

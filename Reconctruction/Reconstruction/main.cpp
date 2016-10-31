@@ -25,6 +25,7 @@
 #include "derivative.h"
 #include "baseline.h"
 #include "integral.h"
+#include "fft.h"
 
 using namespace std;
 
@@ -54,8 +55,10 @@ int main(int argc, char *argv[])
     const double time_integral_from = 1950; // ns
     const double time_integral_to = 1950 + 700; // ns
     const double time_avr_baseline_to = 1600; // ns
-    const int events_per_file = 100;
-    const int max_files = 100;
+    const int events_per_file = 1000;
+    const int max_files = 1000;
+    const double time_fft_noise_from = 0;//ns
+    const double time_fft_noise_to = time_avr_baseline_to;//ns
 
     //
     vector<int> xv;
@@ -63,6 +66,7 @@ int main(int argc, char *argv[])
     bool is_first_event = true;
     TFile* f_tree = NULL;
     TTree* tree = NULL;
+    int counter_f_tree = 0;
 
 
     for(int file_i = 0; file_i < max_files; file_i++)
@@ -112,9 +116,7 @@ int main(int argc, char *argv[])
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_calculate_der += get_time_delta(timespec_str_before, timespec_str_after);
 
-        //create file name to write root tree
-        ostringstream file_tree_oss;
-        file_tree_oss << trees_dir << "Run" << setfill('0') << setw(6) << run_id << "_event" << setfill('0') << setw(7) << file_i << ".root";
+
 
         //set variables to save in tree
         double integral_ch1, integral_ch2;
@@ -123,7 +125,7 @@ int main(int argc, char *argv[])
 
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
-        //caculate baseline
+        //calcucate baseline
         baseline_ch1 = Get_baseline(data[1], (int)(time_avr_baseline_to / time_scale) );
         baseline_ch2 = Get_baseline(data[2], (int)(time_avr_baseline_to / time_scale) );
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
@@ -131,24 +133,47 @@ int main(int argc, char *argv[])
 
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
-        //calucate abs amp of signal
+        //calcucate abs amp of signal
         max_abs_amp_ch1 = abs( *min_element(data[1].begin(), data[1].end()) - baseline_ch1 );
         max_abs_amp_ch2 = abs( *min_element(data[2].begin(), data[2].end()) - baseline_ch2 );
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_calculate_abs_amp += get_time_delta(timespec_str_before, timespec_str_after);
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
-        //caculate integral
+        //calculate integral
         integral_ch1 = Get_integral(data[1], baseline_ch1, time_scale, time_integral_from, time_integral_to);
         integral_ch2 = Get_integral(data[2], baseline_ch2, time_scale, time_integral_from, time_integral_to);
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_calculate_integral += get_time_delta(timespec_str_before, timespec_str_after);
 
 
+        //test data for fft
+        TF1 *f_ff1 = new TF1("fcos", "0.5*cos(2*3.1416*10*x + 3.1416*0/6)", 0, 1);
+        const int N_raw = 256;
+        const int N_fft = N_raw/2 + 1;
+        const double sampling_frequency = 320;//Hz
+        const double delta_frequency = sampling_frequency / N_raw;
+        vector<double> test_data_y;
+        vector<double> test_data_x;
+        for (int i = 0; i < N_raw; ++i)
+        {
+            test_data_x.push_back( i/sampling_frequency );
+            test_data_y.push_back( f_ff1->Eval(i/sampling_frequency) );
+        }
+
+
+        //calculate fft
+        vector< vector<double> > ch1_fft_amp_spectum_noise = Get_fft_amp_spectrum(test_data_y, time_fft_noise_from, time_fft_noise_to, 1.0/sampling_frequency);
+//        vector< vector<double> > ch2_fft_amp_spectum_noise = Get_fft_amp_spectrum(data[2], time_fft_noise_from, time_fft_noise_to, time_scale);
+
+
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
         //add graphs to canvas
+//        TCanvas canv = Get_canvas(vector<int> x0, vector<double> x0_double, vector< vector<int> > data_raw,
+//                                  vector< vector<int> > data_proc, int nsamps, double time_scale);
+
         TCanvas canv("c", "c", 0, 0, 1900, 1000);
-        canv.Divide(2, 2);
+        canv.Divide(2, 3);
 
 
         //cd1
@@ -201,10 +226,35 @@ int main(int argc, char *argv[])
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_tree_add_graphs += get_time_delta(timespec_str_before, timespec_str_after);
 
+        //cd5
+        TGraph graph_ch1_fft_noise(test_data_x.size(), &test_data_x[0], &test_data_y[0]);
+        graph_ch1_fft_noise.SetTitle("Test data frequency spectrum");
+        canv.cd(5);
+        graph_ch1_fft_noise.Draw("AP");
+        graph_ch1_fft_noise.SetMarkerStyle(20);
+        graph_ch1_fft_noise.SetMarkerSize(0.5);
+
+        f_ff1->Draw("same");
+
+        //cd6
+        TGraph graph_ch2_fft_noise(ch1_fft_amp_spectum_noise[0].size(), &ch1_fft_amp_spectum_noise[0][0], &ch1_fft_amp_spectum_noise[1][0]);
+        graph_ch2_fft_noise.SetTitle("amp fft of test data");
+        canv.cd(6);
+        graph_ch2_fft_noise.Draw("AP");
+        graph_ch2_fft_noise.SetMarkerStyle(20);
+        graph_ch2_fft_noise.SetMarkerSize(0.5);
+        graph_ch2_fft_noise.SetMarkerColor(kRed);
+
+
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
         if(file_i % events_per_file == 0)
         {
+            //create file name to write root tree
+            ostringstream file_tree_oss;
+            file_tree_oss << trees_dir << "Run" << setfill('0') << setw(6) << run_id << "_block" << setfill('0') << setw(7) << counter_f_tree << ".root";
+            counter_f_tree++;
+
 //            f_tree.Open(file_tree_oss.str().c_str(), "RECREATE");
             //        f_tree.SetCompressionLevel(0); //0 - without compression (max speedof writing), 9 - max compress(max speed of reading)
             f_tree = TFile::Open(file_tree_oss.str().c_str(), "RECREATE");

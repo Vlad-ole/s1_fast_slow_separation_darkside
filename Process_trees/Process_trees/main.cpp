@@ -18,11 +18,12 @@ void ReadTree()
     for(int i = 0; i < n_max; i++)
     {
         ostringstream file_tree_oss;
-        file_tree_oss << dir_name << "Run" << setfill('0') << setw(6) << run_id << "_event" << setfill('0') << setw(7) << i << ".root";
+        file_tree_oss << dir_name << "Run" << setfill('0') << setw(6) << run_id << "_block" << setfill('0') << setw(7) << i << ".root";
         chain.Add(file_tree_oss.str().c_str());
 
         if(i % 100 == 0) cout << "event = " << i << endl;
     }
+    cout << "chain.GetEntries() = " << chain.GetEntries() << endl;
 
     chain.SetBranchAddress("canvas_tr", &canv);
 
@@ -39,47 +40,50 @@ void ReadTree()
     chain.SetBranchAddress("max_abs_amp_ch2", &max_abs_amp_ch2);
 
 
-     //TCut total_cut = "integral_ch2 > -50000 && integral_ch2 < 50000";
-//    TCut total_cut = "max_abs_amp_ch2 > 9 && max_abs_amp_ch2 < 14";
-//    TCut total_cut = "max_abs_amp_ch2 < 9";
+    //TCut total_cut = "integral_ch2 > -50000 && integral_ch2 < 50000";
+    //    TCut total_cut = "max_abs_amp_ch2 > 9 && max_abs_amp_ch2 < 14";
+    //    TCut total_cut = "max_abs_amp_ch2 < 9";
     TCut total_cut = "";
 
     chain.SetMarkerStyle(4);
 
-//    chain.Draw("max_abs_amp_ch1>>h1(300,0,100)", total_cut);
-    chain.Draw("integral_ch1>>h2(500,-40000,5000)", total_cut);
+    //    chain.Draw("max_abs_amp_ch1>>h1(300,0,100)", total_cut);
+    chain.Draw("integral_ch2>>h2(300,-35000,5000)", total_cut);
 
-//   chain.Draw("integral_ch2>>h2(500,-20000,5000)", total_cut); // >>hsqrt(bins, min, max)
-//    chain.Draw("integral_ch1>>h1(500,-20000,5000)", total_cut);
+    //   chain.Draw("integral_ch2>>h2(500,-20000,5000)", total_cut); // >>hsqrt(bins, min, max)
+    //    chain.Draw("integral_ch1>>h1(500,-20000,5000)", total_cut);
 
-//   TH1F *h2 = (TH1F*)gDirectory->Get("h2");
-//   TH1F *h1 = (TH1F*)gDirectory->Get("h1");
+    //   TH1F *h2 = (TH1F*)gDirectory->Get("h2");
+    //   TH1F *h1 = (TH1F*)gDirectory->Get("h1");
 
-//   h1->SetFillStyle(3001);
-//   h2->SetFillStyle(3001);
-
-
-//   h1->SetFillColor(kBlue);
-//   h2->SetFillColor(kRed);
+    //   h1->SetFillStyle(3001);
+    //   h2->SetFillStyle(3001);
 
 
-//   h2->Draw();
-//   h1->Draw("same");
+    //   h1->SetFillColor(kBlue);
+    //   h2->SetFillColor(kRed);
 
-    cout << "chain.GetEntries() = " << chain.GetEntries() << endl;
-   for (int i = 0; i < chain.GetEntries() ; ++i)
-   {
-       chain.GetEntry(i);
-//       if(integral_ch1 > 2000)
-       {
-           Hlist_gr.Add( canv->Clone() );
-       }
-   }
 
-   TFile ofile_Hlist_gr(graph_name.c_str(), "RECREATE");
-   Hlist_gr.Write();
-   ofile_Hlist_gr.Close();
+    //   h2->Draw();
+    //   h1->Draw("same");
 
-   cout << endl << "Root cern script: all is ok" << endl;
+    const int n_entr = 5;
+//    const int n_entr = chain.GetEntries();
+    for (int i = 0; i < n_entr ; ++i)
+    {
+        chain.GetEntry(i);
+        //       TGraph *gh_cd1 = (TGraph*)canv->GetListOfPrimitives()->FindObject("Graph");
+
+        //       if(integral_ch1 > 2000)
+        //       {
+        Hlist_gr.Add( canv->Clone() );
+        //       }
+    }
+
+       TFile ofile_Hlist_gr(graph_name.c_str(), "RECREATE");
+       Hlist_gr.Write();
+       ofile_Hlist_gr.Close();
+
+    cout << endl << "Root cern script: all is ok" << endl;
 
 }

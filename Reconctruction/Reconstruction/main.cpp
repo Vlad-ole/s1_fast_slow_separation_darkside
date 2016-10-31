@@ -148,10 +148,12 @@ int main(int argc, char *argv[])
 
 
         //test data for fft
-        TF1 *f_ff1 = new TF1("fcos", "0.5*cos(2*3.1416*10*x + 3.1416*0/6)", 0, 1);
-        const int N_raw = 256;
+        TF1 *f_ff1 = new TF1("fcos", "0.5*cos(2*3.1416*10*x - 3.1416*1/2.0)", 0, 1);
+        const double time = 20.0 / 10.0;
+        const double sampling_frequency = 100;//Hz
+        const int N_raw = time * sampling_frequency;
         const int N_fft = N_raw/2 + 1;
-        const double sampling_frequency = 320;//Hz
+
         const double delta_frequency = sampling_frequency / N_raw;
         vector<double> test_data_y;
         vector<double> test_data_x;

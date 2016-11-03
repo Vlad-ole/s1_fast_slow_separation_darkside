@@ -17,7 +17,8 @@ SOURCES += \
     fill_canvas.cpp \
     fft.cpp \
     main_1pe.cpp \
-    main_am.cpp
+    main_am.cpp \
+    individual_time_amp.cpp
 
 INCLUDEPATH += "/home/darkside/Vlad_Programs/root/include"
 
@@ -108,4 +109,5 @@ HEADERS += \
     baseline.h \
     integral.h \
     fill_canvas.h \
-    fft.h
+    fft.h \
+    individual_time_amp.h

@@ -55,7 +55,8 @@ SOURCES       = ../Reconstruction/read_file.cpp \
 		../Reconstruction/fill_canvas.cpp \
 		../Reconstruction/fft.cpp \
 		../Reconstruction/main_1pe.cpp \
-		../Reconstruction/main_am.cpp 
+		../Reconstruction/main_am.cpp \
+		../Reconstruction/individual_time_amp.cpp 
 OBJECTS       = read_file.o \
 		derivative.o \
 		baseline.o \
@@ -63,7 +64,8 @@ OBJECTS       = read_file.o \
 		fill_canvas.o \
 		fft.o \
 		main_1pe.o \
-		main_am.o
+		main_am.o \
+		individual_time_amp.o
 DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt5/mkspecs/common/unix.conf \
 		/usr/lib64/qt5/mkspecs/common/linux.conf \
@@ -124,14 +126,16 @@ DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		../Reconstruction/baseline.h \
 		../Reconstruction/integral.h \
 		../Reconstruction/fill_canvas.h \
-		../Reconstruction/fft.h ../Reconstruction/read_file.cpp \
+		../Reconstruction/fft.h \
+		../Reconstruction/individual_time_amp.h ../Reconstruction/read_file.cpp \
 		../Reconstruction/derivative.cpp \
 		../Reconstruction/baseline.cpp \
 		../Reconstruction/integral.cpp \
 		../Reconstruction/fill_canvas.cpp \
 		../Reconstruction/fft.cpp \
 		../Reconstruction/main_1pe.cpp \
-		../Reconstruction/main_am.cpp
+		../Reconstruction/main_am.cpp \
+		../Reconstruction/individual_time_amp.cpp
 QMAKE_TARGET  = Reconstruction
 DESTDIR       = 
 TARGET        = Reconstruction
@@ -273,8 +277,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib64/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../Reconstruction/read_file.h ../Reconstruction/derivative.h ../Reconstruction/baseline.h ../Reconstruction/integral.h ../Reconstruction/fill_canvas.h ../Reconstruction/fft.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../Reconstruction/read_file.cpp ../Reconstruction/derivative.cpp ../Reconstruction/baseline.cpp ../Reconstruction/integral.cpp ../Reconstruction/fill_canvas.cpp ../Reconstruction/fft.cpp ../Reconstruction/main_1pe.cpp ../Reconstruction/main_am.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../Reconstruction/read_file.h ../Reconstruction/derivative.h ../Reconstruction/baseline.h ../Reconstruction/integral.h ../Reconstruction/fill_canvas.h ../Reconstruction/fft.h ../Reconstruction/individual_time_amp.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../Reconstruction/read_file.cpp ../Reconstruction/derivative.cpp ../Reconstruction/baseline.cpp ../Reconstruction/integral.cpp ../Reconstruction/fill_canvas.cpp ../Reconstruction/fft.cpp ../Reconstruction/main_1pe.cpp ../Reconstruction/main_am.cpp ../Reconstruction/individual_time_amp.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -443,8 +447,96 @@ main_1pe.o: ../Reconstruction/main_1pe.cpp ../../../../root/include/TF1.h \
 		../Reconstruction/fft.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main_1pe.o ../Reconstruction/main_1pe.cpp
 
-main_am.o: ../Reconstruction/main_am.cpp 
+main_am.o: ../Reconstruction/main_am.cpp ../../../../root/include/TF1.h \
+		../../../../root/include/TFormula.h \
+		../../../../root/include/TNamed.h \
+		../../../../root/include/TObject.h \
+		../../../../root/include/Rtypes.h \
+		../../../../root/include/RConfig.h \
+		../../../../root/include/RVersion.h \
+		../../../../root/include/DllImport.h \
+		../../../../root/include/Rtypeinfo.h \
+		../../../../root/include/snprintf.h \
+		../../../../root/include/strlcpy.h \
+		../../../../root/include/TGenericClassInfo.h \
+		../../../../root/include/TSchemaHelper.h \
+		../../../../root/include/TStorage.h \
+		../../../../root/include/TVersionCheck.h \
+		../../../../root/include/Riosfwd.h \
+		../../../../root/include/TBuffer.h \
+		../../../../root/include/TString.h \
+		../../../../root/include/TMathBase.h \
+		../../../../root/include/TBits.h \
+		../../../../root/include/TObjArray.h \
+		../../../../root/include/TSeqCollection.h \
+		../../../../root/include/TCollection.h \
+		../../../../root/include/TIterator.h \
+		../../../../root/include/TAttLine.h \
+		../../../../root/include/TAttFill.h \
+		../../../../root/include/TAttMarker.h \
+		../../../../root/include/Math/ParamFunctor.h \
+		../../../../root/include/TGraph.h \
+		../../../../root/include/TVectorFfwd.h \
+		../../../../root/include/TVectorDfwd.h \
+		../../../../root/include/TFitResultPtr.h \
+		../../../../root/include/TFile.h \
+		../../../../root/include/TDirectoryFile.h \
+		../../../../root/include/TDirectory.h \
+		../../../../root/include/TList.h \
+		../../../../root/include/TDatime.h \
+		../../../../root/include/TUUID.h \
+		../../../../root/include/TMap.h \
+		../../../../root/include/THashTable.h \
+		../../../../root/include/TUrl.h \
+		../../../../root/include/TRandom.h \
+		../../../../root/include/TMath.h \
+		../../../../root/include/TError.h \
+		../../../../root/include/TGraphErrors.h \
+		../../../../root/include/TTree.h \
+		../../../../root/include/TBranch.h \
+		../../../../root/include/TDataType.h \
+		../../../../root/include/TDictionary.h \
+		../../../../root/include/Property.h \
+		../../../../root/include/ESTLType.h \
+		../../../../root/include/TArrayD.h \
+		../../../../root/include/TArray.h \
+		../../../../root/include/TArrayI.h \
+		../../../../root/include/TClass.h \
+		../../../../root/include/TObjString.h \
+		../../../../root/include/ThreadLocalStorage.h \
+		../../../../root/include/RConfigure.h \
+		../../../../root/include/TVirtualTreePlayer.h \
+		../../../../root/include/TCanvas.h \
+		../../../../root/include/TPad.h \
+		../../../../root/include/TVirtualPad.h \
+		../../../../root/include/TAttPad.h \
+		../../../../root/include/TVirtualX.h \
+		../../../../root/include/TAttText.h \
+		../../../../root/include/GuiTypes.h \
+		../../../../root/include/Buttons.h \
+		../../../../root/include/TQObject.h \
+		../../../../root/include/TQClass.h \
+		../../../../root/include/TAttBBox2D.h \
+		../../../../root/include/TPoint.h \
+		../../../../root/include/TAttCanvas.h \
+		../../../../root/include/TCanvasImp.h \
+		../../../../root/include/TROOT.h \
+		../../../../root/include/TText.h \
+		../../../../root/include/TLatex.h \
+		../../../../root/include/TPaveText.h \
+		../../../../root/include/TPave.h \
+		../../../../root/include/TBox.h \
+		../../../../root/include/TLine.h \
+		../../../../root/include/TAxis.h \
+		../../../../root/include/TAttAxis.h \
+		../Reconstruction/read_file.h \
+		../Reconstruction/derivative.h \
+		../Reconstruction/baseline.h \
+		../Reconstruction/integral.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main_am.o ../Reconstruction/main_am.cpp
+
+individual_time_amp.o: ../Reconstruction/individual_time_amp.cpp ../Reconstruction/individual_time_amp.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o individual_time_amp.o ../Reconstruction/individual_time_amp.cpp
 
 ####### Install
 

@@ -1,7 +1,7 @@
 #include "baseline.h"
 
 
-double Get_baseline(const vector<int> data_v, const int right_time_point)
+double Get_baseline(const vector<double> data_v, const int right_time_point)
 {
     double baseline = 0;
 

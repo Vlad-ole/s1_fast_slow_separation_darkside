@@ -7,6 +7,8 @@
 
 using namespace std;
 
+
+///output in MHz
 vector< vector<double> > Get_fft_amp_spectrum(vector<double> data, const double time_fft_noise_from, const double time_fft_noise_to, const double time_scale);
 
 #endif // FFT_H

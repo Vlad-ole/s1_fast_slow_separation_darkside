@@ -1,6 +1,6 @@
 #include "integral.h"
 
-double Get_integral(const vector<int> data_v, const double baseline, const int time_scale, const double time_from, const double time_to)
+double Get_integral(const vector<double> data_v, const double baseline, const int time_scale, const double time_from, const double time_to)
 {
     double integral = 0;
     const int point_from = time_from / time_scale;

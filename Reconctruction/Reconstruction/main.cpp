@@ -20,6 +20,7 @@
 #include "TText.h"
 #include "TLatex.h"
 #include "TPaveText.h"
+#include "TAxis.h"
 
 #include "read_file.h"
 #include "derivative.h"
@@ -57,11 +58,14 @@ int main(int argc, char *argv[])
     const double time_avr_baseline_to = 1600; // ns
     const int events_per_file = 1000;
     const int max_files = 1000;
+
+    //fft
     const double time_fft_noise_from = 0;//ns
     const double time_fft_noise_to = time_avr_baseline_to;//ns
+    const double time_fft_signal_from = time_integral_from;
+    const double time_fft_signal_to = time_integral_to;
 
     //
-    vector<int> xv;
     vector<double> xv_double;
     bool is_first_event = true;
     TFile* f_tree = NULL;
@@ -79,7 +83,7 @@ int main(int argc, char *argv[])
         if (file_i % 100 == 0) cout << f_oss.str() << endl;
 
         //read data from binary file
-        vector< vector<int> > data = Get_data( f_oss.str() );
+        vector< vector<double> > data = Get_data( f_oss.str() );
         const int nsamps = data[0].size();
         if(data[0].size() == 0 || data[1].size() == 0 || data[2].size() == 0)//some files can be empty. I do not know why
         {
@@ -92,15 +96,12 @@ int main(int argc, char *argv[])
 
         if(is_first_event)
         {
-            xv.reserve(nsamps);
             xv_double.resize(nsamps);
             is_first_event = false;
             for(int j = 0; j < nsamps; j++)
             {
-                xv[j] = j * time_scale;
+                xv_double[j] = j * time_scale;
             }
-
-            for (int j = 0; j < nsamps; j++) xv_double[j] = xv[j]; //it is a stupid code, but TGraph don't have constructor TGraph(nsamp, int, double)
 
             cout << "xv was set" << endl;
         }
@@ -128,6 +129,16 @@ int main(int argc, char *argv[])
         //calcucate baseline
         baseline_ch1 = Get_baseline(data[1], (int)(time_avr_baseline_to / time_scale) );
         baseline_ch2 = Get_baseline(data[2], (int)(time_avr_baseline_to / time_scale) );
+        vector< vector<double> > data_minus_baseline;
+        data_minus_baseline.resize(3);
+        data_minus_baseline[0].resize(nsamps);
+        data_minus_baseline[1].resize(nsamps);
+        data_minus_baseline[2].resize(nsamps);
+        for (int i = 0; i < nsamps; ++i)
+        {
+            data_minus_baseline[1][i] = data[1][i] - baseline_ch1;
+            data_minus_baseline[2][i] = data[2][i] - baseline_ch2;
+        }
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_calculate_baseline += get_time_delta(timespec_str_before, timespec_str_after);
 
@@ -147,42 +158,50 @@ int main(int argc, char *argv[])
         t_calculate_integral += get_time_delta(timespec_str_before, timespec_str_after);
 
 
-        //test data for fft
-        TF1 *f_ff1 = new TF1("fcos", "0.5*cos(2*3.1416*10*x - 3.1416*1/2.0)", 0, 1);
-        const double time = 20.0 / 10.0;
-        const double sampling_frequency = 100;//Hz
-        const int N_raw = time * sampling_frequency;
-        const int N_fft = N_raw/2 + 1;
+//        //test data for fft
+//        TF1 *f_ff1 = new TF1("fcos", "0.5*cos(2*3.1416*10*x - 3.1416*1/2.0) + sin(2*3.1416*35*x) + 1", 0, 1);
+//        const double time = 20.0 / 10.0;
+//        const double sampling_frequency = 100;//Hz
+//        const int N_raw = time * sampling_frequency;
+//        const int N_fft = N_raw/2 + 1;
 
-        const double delta_frequency = sampling_frequency / N_raw;
-        vector<double> test_data_y;
-        vector<double> test_data_x;
-        for (int i = 0; i < N_raw; ++i)
-        {
-            test_data_x.push_back( i/sampling_frequency );
-            test_data_y.push_back( f_ff1->Eval(i/sampling_frequency) );
-        }
+//        const double delta_frequency = sampling_frequency / N_raw;
+//        vector<double> test_data_y;
+//        vector<double> test_data_x;
+//        for (int i = 0; i < N_raw; ++i)
+//        {
+//            test_data_x.push_back( i/sampling_frequency );
+//            test_data_y.push_back( f_ff1->Eval(i/sampling_frequency) );
+//        }
 
 
-        //calculate fft
-        vector< vector<double> > ch1_fft_amp_spectum_noise = Get_fft_amp_spectrum(test_data_y, time_fft_noise_from, time_fft_noise_to, 1.0/sampling_frequency);
-//        vector< vector<double> > ch2_fft_amp_spectum_noise = Get_fft_amp_spectrum(data[2], time_fft_noise_from, time_fft_noise_to, time_scale);
-
+        //calculate fft. Output in MHz
+//        vector< vector<double> > ch1_fft_amp_spectum_noise = Get_fft_amp_spectrum(test_data_y, time_fft_noise_from, time_fft_noise_to, 1.0/sampling_frequency);
+        vector< vector<double> > ch1_fft_amp_spectum_noise = Get_fft_amp_spectrum(data_minus_baseline[1], time_fft_noise_from, time_fft_noise_to, time_scale);
+        vector< vector<double> > ch2_fft_amp_spectum_noise = Get_fft_amp_spectrum(data_minus_baseline[2], time_fft_noise_from, time_fft_noise_to, time_scale);
+        vector< vector<double> > ch1_fft_amp_spectum_signal = Get_fft_amp_spectrum(data_minus_baseline[1], time_fft_signal_from, time_fft_signal_to, time_scale);
+        vector< vector<double> > ch2_fft_amp_spectum_signal = Get_fft_amp_spectrum(data_minus_baseline[2], time_fft_signal_from, time_fft_signal_to, time_scale);
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
         //add graphs to canvas
 //        TCanvas canv = Get_canvas(vector<int> x0, vector<double> x0_double, vector< vector<int> > data_raw,
 //                                  vector< vector<int> > data_proc, int nsamps, double time_scale);
 
-        TCanvas canv("c", "c", 0, 0, 1900, 1000);
-        canv.Divide(2, 3);
+        TCanvas canv("c", "c", 0, 0, 1900, 1500);
+//        canv.SetCanvasSize(1900, 2000);
+        //canv.SetWindowSize(100, 100);
+        canv.Divide(2, 4);
 
 
         //cd1
-        TGraph graph_ch1(nsamps, &xv[0], &data[1][0]);
+        TGraph graph_ch1(nsamps, &xv_double[0], &data[1][0]);
         graph_ch1.SetTitle("original (Channel 1, SiPM)");
+        graph_ch1.GetXaxis()->SetTitle("time [ns]");
+        graph_ch1.GetYaxis()->SetTitle("amplitude[channels]");
         canv.cd(1);
         graph_ch1.Draw("apl");
+
+
 
         TF1 tf1_baseline_ch1("tf1_baseline_ch1","[0]",0,time_scale*nsamps);
         tf1_baseline_ch1.SetParameter(0,baseline_ch1);
@@ -196,8 +215,10 @@ int main(int argc, char *argv[])
         pt_cd1.Draw();
 
         //cd2
-        TGraph graph_ch2(nsamps, &xv[0], &data[2][0]);
+        TGraph graph_ch2(nsamps, &xv_double[0], &data[2][0]);
         graph_ch2.SetTitle("original (Channel 2, SiPM)");
+        graph_ch2.GetXaxis()->SetTitle("time [ns]");
+        graph_ch2.GetYaxis()->SetTitle("amplitude[channels]");
         canv.cd(2);
         graph_ch2.Draw();
 
@@ -216,12 +237,16 @@ int main(int argc, char *argv[])
         //cd3
         TGraph graph_ch1_processing(nsamps, &xv_double[0], &ch1_der[0]);
         graph_ch1_processing.SetTitle("derivative (Channel 1, SiPM)");
+        graph_ch1_processing.GetXaxis()->SetTitle("time [ns]");
+        graph_ch1_processing.GetYaxis()->SetTitle("derivative [channels / ns]");
         canv.cd(3);
         graph_ch1_processing.Draw();
 
         //cd4
         TGraph graph_ch2_processing(nsamps, &xv_double[0], &ch2_der[0]);
         graph_ch2_processing.SetTitle("derivative (Channel 2, SiPM)");
+        graph_ch2_processing.GetXaxis()->SetTitle("time [ns]");
+        graph_ch2_processing.GetYaxis()->SetTitle("derivative [channels / ns]");
         canv.cd(4);
         graph_ch2_processing.Draw();
 
@@ -229,23 +254,50 @@ int main(int argc, char *argv[])
         t_tree_add_graphs += get_time_delta(timespec_str_before, timespec_str_after);
 
         //cd5
-        TGraph graph_ch1_fft_noise(test_data_x.size(), &test_data_x[0], &test_data_y[0]);
-        graph_ch1_fft_noise.SetTitle("Test data frequency spectrum");
+        TGraph graph_ch1_fft_noise(ch1_fft_amp_spectum_noise[0].size(), &ch1_fft_amp_spectum_noise[0][0], &ch1_fft_amp_spectum_noise[1][0]);
+        graph_ch1_fft_noise.SetTitle("Amplitude spectrum of noise signal (Channel 1, SiPM)");
+        graph_ch1_fft_noise.GetXaxis()->SetTitle("frequensy [MHz]");
+        graph_ch1_fft_noise.GetYaxis()->SetTitle("amplitude [a.u.]");
         canv.cd(5);
         graph_ch1_fft_noise.Draw("AP");
         graph_ch1_fft_noise.SetMarkerStyle(20);
         graph_ch1_fft_noise.SetMarkerSize(0.5);
+        graph_ch1_fft_noise.SetMarkerColor(kRed);
 
-        f_ff1->Draw("same");
+//        f_ff1->Draw("same");//draw function of test data
 
         //cd6
-        TGraph graph_ch2_fft_noise(ch1_fft_amp_spectum_noise[0].size(), &ch1_fft_amp_spectum_noise[0][0], &ch1_fft_amp_spectum_noise[1][0]);
-        graph_ch2_fft_noise.SetTitle("amp fft of test data");
+        TGraph graph_ch2_fft_noise(ch2_fft_amp_spectum_noise[0].size(), &ch2_fft_amp_spectum_noise[0][0], &ch2_fft_amp_spectum_noise[1][0]);
+        graph_ch2_fft_noise.SetTitle("Amplitude spectrum of noise signal (Channel 2, SiPM)");
+        graph_ch2_fft_noise.GetXaxis()->SetTitle("frequensy [MHz]");
+        graph_ch2_fft_noise.GetYaxis()->SetTitle("amplitude [a.u.]");
         canv.cd(6);
         graph_ch2_fft_noise.Draw("AP");
         graph_ch2_fft_noise.SetMarkerStyle(20);
         graph_ch2_fft_noise.SetMarkerSize(0.5);
         graph_ch2_fft_noise.SetMarkerColor(kRed);
+
+        //cd7
+        TGraph graph_ch1_fft_signal(ch1_fft_amp_spectum_signal[0].size(), &ch1_fft_amp_spectum_signal[0][0], &ch1_fft_amp_spectum_signal[1][0]);
+        graph_ch1_fft_signal.SetTitle("Amplitude spectrum of signal (Channel 1, SiPM)");
+        graph_ch1_fft_signal.GetXaxis()->SetTitle("frequensy [MHz]");
+        graph_ch1_fft_signal.GetYaxis()->SetTitle("amplitude [a.u.]");
+        canv.cd(7);
+        graph_ch1_fft_signal.Draw("AP");
+        graph_ch1_fft_signal.SetMarkerStyle(20);
+        graph_ch1_fft_signal.SetMarkerSize(0.5);
+        graph_ch1_fft_signal.SetMarkerColor(kRed);
+
+        //cd8
+        TGraph graph_ch2_fft_signal(ch2_fft_amp_spectum_signal[0].size(), &ch2_fft_amp_spectum_signal[0][0], &ch2_fft_amp_spectum_signal[1][0]);
+        graph_ch2_fft_signal.SetTitle("Amplitude spectrum of signal (Channel 2, SiPM)");
+        graph_ch2_fft_signal.GetXaxis()->SetTitle("frequensy [MHz]");
+        graph_ch2_fft_signal.GetYaxis()->SetTitle("amplitude [a.u.]");
+        canv.cd(8);
+        graph_ch2_fft_signal.Draw("AP");
+        graph_ch2_fft_signal.SetMarkerStyle(20);
+        graph_ch2_fft_signal.SetMarkerSize(0.5);
+        graph_ch2_fft_signal.SetMarkerColor(kRed);
 
 
 

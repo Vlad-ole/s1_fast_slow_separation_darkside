@@ -67,22 +67,84 @@ void ReadTree()
     //   h2->Draw();
     //   h1->Draw("same");
 
-    const int n_entr = 5;
-//    const int n_entr = chain.GetEntries();
-    for (int i = 0; i < n_entr ; ++i)
+    bool is_first_time = true;
+    int cut_event_counter = 0;
+    int size_cd1;
+    vector<double> xv_time;
+    vector<double> yv_cd1_ch1_amp;
+    vector<double> yv_cd2_ch2_amp;
+    //    xv_time.resize();
+
+    const int n_entr = 100;
+    //    const int n_entr = chain.GetEntries();
+    for (int i = 0; i < n_entr; ++i)
     {
         chain.GetEntry(i);
-        //       TGraph *gh_cd1 = (TGraph*)canv->GetListOfPrimitives()->FindObject("Graph");
 
-        //       if(integral_ch1 > 2000)
-        //       {
-        Hlist_gr.Add( canv->Clone() );
-        //       }
+
+        if(1)//start cut
+        {
+//            cout << "cut_event_counter = " << cut_event_counter << endl;
+            cut_event_counter++;
+            TPad *pad_cd1 = (TPad*)canv->GetListOfPrimitives()->FindObject("c_1");
+            TGraph *gh_cd1 = (TGraph*)pad_cd1->GetListOfPrimitives()->FindObject("Graph");
+
+            TPad *pad_cd2 = (TPad*)canv->GetListOfPrimitives()->FindObject("c_2");
+            TGraph *gh_cd2 = (TGraph*)pad_cd2->GetListOfPrimitives()->FindObject("Graph");
+
+            TPad *pad_cd3 = (TPad*)canv->GetListOfPrimitives()->FindObject("c_3");
+            TGraph *gh_cd3 = (TGraph*)pad_cd3->GetListOfPrimitives()->FindObject("Graph");
+
+            TPad *pad_cd4 = (TPad*)canv->GetListOfPrimitives()->FindObject("c_4");
+            TGraph *gh_cd4 = (TGraph*)pad_cd4->GetListOfPrimitives()->FindObject("Graph");
+
+            TPad *pad_cd5 = (TPad*)canv->GetListOfPrimitives()->FindObject("c_5");
+            TGraph *gh_cd5 = (TGraph*)pad_cd5->GetListOfPrimitives()->FindObject("Graph");
+
+            TPad *pad_cd6 = (TPad*)canv->GetListOfPrimitives()->FindObject("c_6");
+            TGraph *gh_cd6 = (TGraph*)pad_cd6->GetListOfPrimitives()->FindObject("Graph");
+
+            TPad *pad_cd7 = (TPad*)canv->GetListOfPrimitives()->FindObject("c_7");
+            TGraph *gh_cd7 = (TGraph*)pad_cd7->GetListOfPrimitives()->FindObject("Graph");
+
+            TPad *pad_cd8 = (TPad*)canv->GetListOfPrimitives()->FindObject("c_8");
+            TGraph *gh_cd8 = (TGraph*)pad_cd8->GetListOfPrimitives()->FindObject("Graph");
+
+            if(gh_cd1 == NULL || gh_cd2 == NULL || gh_cd3 == NULL || gh_cd4 == NULL
+                    || gh_cd5 == NULL || gh_cd6 == NULL || gh_cd7 == NULL || gh_cd8 == NULL)
+
+
+            if(is_first_time)
+            {
+                is_first_time = false;
+                size_cd1 = gh_cd1->GetN();
+                xv_time.resize(size_cd1);
+                yv_cd1_ch1_amp.resize(size_cd1);
+            }
+
+            for (int k = 0; k < size_cd1; ++k)
+            {
+                double y;
+                gh_cd1->GetPoint(k, xv_time[k], y);
+                yv_cd1_ch1_amp[k] += y;
+            }
+
+            //        Hlist_gr.Add( gh_cd1->Clone() );
+//                    Hlist_gr.Add( canv->Clone() );
+        }//end cut
     }
 
-       TFile ofile_Hlist_gr(graph_name.c_str(), "RECREATE");
-       Hlist_gr.Write();
-       ofile_Hlist_gr.Close();
+    for (int i = 0; i < xv_time.size(); ++i)
+    {
+        yv_cd1_ch1_amp[i] /= cut_event_counter;
+    }
+    TGraph graph_ch1(xv_time.size(), &xv_time[0], &yv_cd1_ch1_amp[0]);
+
+
+    TFile ofile_Hlist_gr(graph_name.c_str(), "RECREATE");
+//    Hlist_gr.Write();
+    graph_ch1.Write();
+    ofile_Hlist_gr.Close();
 
     cout << endl << "Root cern script: all is ok" << endl;
 

@@ -1,7 +1,7 @@
 #include "read_file.h"
 #include <fstream>
 
-vector< vector<int> > Get_data(string file_name)
+vector< vector<double> > Get_data(string file_name)
 {
 
     ifstream input_file;
@@ -37,11 +37,23 @@ vector< vector<int> > Get_data(string file_name)
 
     input_file.close();
 
-    vector< vector<int> > data;
+    vector< vector<double> > data;
 
-    data.push_back(ch0_read);
-    data.push_back(ch1_read);
-    data.push_back(ch2_read);
+    data.push_back( vector_from_int_to_double(ch0_read) );
+    data.push_back( vector_from_int_to_double(ch1_read) );
+    data.push_back( vector_from_int_to_double(ch2_read) );
 
     return data;
+}
+
+vector<double> vector_from_int_to_double(vector<int> vector_int)
+{
+    vector<double> vector_double;
+    vector_double.resize( vector_int.size() );
+    for (int i = 0; i < vector_int.size(); ++i)
+    {
+        vector_double[i] = vector_int[i];
+    }
+
+    return vector_double;
 }

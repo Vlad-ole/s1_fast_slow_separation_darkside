@@ -70,9 +70,20 @@ void ReadTree()
     bool is_first_time = true;
     int cut_event_counter = 0;
     int size_cd1;
-    vector<double> xv_time;
-    vector<double> yv_cd1_ch1_amp;
-    vector<double> yv_cd2_ch2_amp;
+    int size_cd5;
+    int size_cd7;
+    vector<double> xv_cd1;
+    vector<double> xv_cd5;
+    vector<double> xv_cd7;
+
+    vector<double> yv_cd1;
+    vector<double> yv_cd2;
+    vector<double> yv_cd3;
+    vector<double> yv_cd4;
+    vector<double> yv_cd5;
+    vector<double> yv_cd6;
+    vector<double> yv_cd7;
+    vector<double> yv_cd8;
     //    xv_time.resize();
 
     const int n_entr = 100;
@@ -111,22 +122,85 @@ void ReadTree()
             TGraph *gh_cd8 = (TGraph*)pad_cd8->GetListOfPrimitives()->FindObject("Graph");
 
             if(gh_cd1 == NULL || gh_cd2 == NULL || gh_cd3 == NULL || gh_cd4 == NULL
-                    || gh_cd5 == NULL || gh_cd6 == NULL || gh_cd7 == NULL || gh_cd8 == NULL)
+                    || gh_cd5 == NULL || gh_cd6 == NULL || gh_cd7 == NULL || gh_cd8 == NULL) cout << "graph pnt in null" << endl;
 
 
             if(is_first_time)
             {
                 is_first_time = false;
                 size_cd1 = gh_cd1->GetN();
-                xv_time.resize(size_cd1);
-                yv_cd1_ch1_amp.resize(size_cd1);
+                size_cd5 = gh_cd5->GetN();
+                size_cd7 = gh_cd7->GetN();
+
+                xv_cd1.resize(size_cd1);
+                yv_cd1.resize(size_cd1);
+                yv_cd2.resize(size_cd1);
+                yv_cd3.resize(size_cd1);
+                yv_cd4.resize(size_cd1);
+
+                xv_cd5.resize(size_cd5);
+                yv_cd5.resize(size_cd5);
+                yv_cd6.resize(size_cd5);
+
+                xv_cd7.resize(size_cd7);
+                yv_cd7.resize(size_cd7);
+                yv_cd8.resize(size_cd7);
+
+                for (int k = 0; k < size_cd1; ++k)
+                {
+                    double x, y;
+                    gh_cd1->GetPoint(k, xv_cd1[k], y);
+                }
+
+                for (int k = 0; k < size_cd5; ++k)
+                {
+                    double x, y;
+                    gh_cd5->GetPoint(k, xv_cd5[k], y);
+                }
+
+                for (int k = 0; k < size_cd7; ++k)
+                {
+                    double x, y;
+                    gh_cd7->GetPoint(k, xv_cd7[k], y);
+                }
+
             }
 
             for (int k = 0; k < size_cd1; ++k)
             {
-                double y;
-                gh_cd1->GetPoint(k, xv_time[k], y);
-                yv_cd1_ch1_amp[k] += y;
+                double x, y;
+
+                gh_cd1->GetPoint(k, x, y);
+                yv_cd1[k] += y;
+
+                gh_cd2->GetPoint(k, x, y);
+                yv_cd2[k] += y;
+
+                gh_cd3->GetPoint(k, x, y);
+                yv_cd3[k] += y;
+
+                gh_cd4->GetPoint(k, x, y);
+                yv_cd4[k] += y;
+            }
+
+            for (int k = 0; k < size_cd5; ++k)
+            {
+                double x, y;
+                gh_cd5->GetPoint(k, x, y);
+                yv_cd5[k] += y;
+
+                gh_cd6->GetPoint(k, x, y);
+                yv_cd6[k] += y;
+            }
+
+            for (int k = 0; k < size_cd7; ++k)
+            {
+                double x, y;
+                gh_cd7->GetPoint(k, x, y);
+                yv_cd7[k] += y;
+
+                gh_cd8->GetPoint(k, x, y);
+                yv_cd8[k] += y;
             }
 
             //        Hlist_gr.Add( gh_cd1->Clone() );
@@ -134,16 +208,108 @@ void ReadTree()
         }//end cut
     }
 
-    for (int i = 0; i < xv_time.size(); ++i)
+    //divide summ by cut_event_counter
+    for (int i = 0; i < xv_cd1.size(); ++i)
     {
-        yv_cd1_ch1_amp[i] /= cut_event_counter;
+        yv_cd1[i] /= cut_event_counter;
+        yv_cd2[i] /= cut_event_counter;
+        yv_cd3[i] /= cut_event_counter;
+        yv_cd4[i] /= cut_event_counter;
     }
-    TGraph graph_ch1(xv_time.size(), &xv_time[0], &yv_cd1_ch1_amp[0]);
+
+    for (int i = 0; i < xv_cd5.size(); ++i)
+    {
+        yv_cd5[i] /= cut_event_counter;
+        yv_cd6[i] /= cut_event_counter;
+    }
+
+    for (int i = 0; i < xv_cd7.size(); ++i)
+    {
+        yv_cd7[i] /= cut_event_counter;
+        yv_cd8[i] /= cut_event_counter;
+    }
+
+
+    //create graphs
+    TGraph graph_cd1(xv_cd1.size(), &xv_cd1[0], &yv_cd1[0]);
+    TGraph graph_cd2(xv_cd1.size(), &xv_cd1[0], &yv_cd2[0]);
+    TGraph graph_cd3(xv_cd1.size(), &xv_cd1[0], &yv_cd3[0]);
+    TGraph graph_cd4(xv_cd1.size(), &xv_cd1[0], &yv_cd4[0]);
+
+    TGraph graph_cd5(xv_cd5.size(), &xv_cd5[0], &yv_cd5[0]);
+    TGraph graph_cd6(xv_cd5.size(), &xv_cd5[0], &yv_cd6[0]);
+
+    TGraph graph_cd7(xv_cd7.size(), &xv_cd7[0], &yv_cd7[0]);
+    TGraph graph_cd8(xv_cd7.size(), &xv_cd7[0], &yv_cd8[0]);
+
+    TCanvas canv_result("c", "c", 0, 0, 1900, 1500);
+    canv_result.Divide(2, 4);
+
+    canv_result.cd(1);
+    graph_cd1.SetTitle("original (Channel 1, SiPM)");
+    graph_cd1.GetXaxis()->SetTitle("time [ns]");
+    graph_cd1.GetYaxis()->SetTitle("amplitude[channels]");
+    graph_cd1.Draw();
+
+    canv_result.cd(2);
+    graph_cd2.SetTitle("original (Channel 2, SiPM)");
+    graph_cd2.GetXaxis()->SetTitle("time [ns]");
+    graph_cd2.GetYaxis()->SetTitle("amplitude[channels]");
+    graph_cd2.Draw();
+
+    canv_result.cd(3);
+    graph_cd3.SetTitle("derivative (Channel 1, SiPM)");
+    graph_cd3.GetXaxis()->SetTitle("time [ns]");
+    graph_cd3.GetYaxis()->SetTitle("derivative [channels / ns]");
+    graph_cd3.Draw();
+
+    canv_result.cd(4);
+    graph_cd4.SetTitle("derivative (Channel 2, SiPM)");
+    graph_cd4.GetXaxis()->SetTitle("time [ns]");
+    graph_cd4.GetYaxis()->SetTitle("derivative [channels / ns]");
+    graph_cd4.Draw();
+
+    canv_result.cd(5);
+    graph_cd5.SetTitle("Amplitude spectrum of noise signal (Channel 1, SiPM)");
+    graph_cd5.GetXaxis()->SetTitle("frequensy [MHz]");
+    graph_cd5.GetYaxis()->SetTitle("amplitude [a.u.]");
+    graph_cd5.Draw("APL");
+    graph_cd5.SetMarkerStyle(20);
+    graph_cd5.SetMarkerSize(0.5);
+    graph_cd5.SetMarkerColor(kRed);
+
+    canv_result.cd(6);
+    graph_cd6.SetTitle("Amplitude spectrum of noise signal (Channel 2, SiPM)");
+    graph_cd6.GetXaxis()->SetTitle("frequensy [MHz]");
+    graph_cd6.GetYaxis()->SetTitle("amplitude [a.u.]");
+    graph_cd6.Draw("APL");
+    graph_cd6.SetMarkerStyle(20);
+    graph_cd6.SetMarkerSize(0.5);
+    graph_cd6.SetMarkerColor(kRed);
+
+    canv_result.cd(7);
+    graph_cd7.SetTitle("Amplitude spectrum of signal (Channel 1, SiPM)");
+    graph_cd7.GetXaxis()->SetTitle("frequensy [MHz]");
+    graph_cd7.GetYaxis()->SetTitle("amplitude [a.u.]");
+    graph_cd7.Draw("APL");
+    graph_cd7.SetMarkerStyle(20);
+    graph_cd7.SetMarkerSize(0.5);
+    graph_cd7.SetMarkerColor(kRed);
+
+    canv_result.cd(8);
+    graph_cd8.SetTitle("Amplitude spectrum of signal (Channel 2, SiPM)");
+    graph_cd8.GetXaxis()->SetTitle("frequensy [MHz]");
+    graph_cd8.GetYaxis()->SetTitle("amplitude [a.u.]");
+    graph_cd8.Draw("APL");
+    graph_cd8.SetMarkerStyle(20);
+    graph_cd8.SetMarkerSize(0.5);
+    graph_cd8.SetMarkerColor(kRed);
+
 
 
     TFile ofile_Hlist_gr(graph_name.c_str(), "RECREATE");
 //    Hlist_gr.Write();
-    graph_ch1.Write();
+    canv_result.Write();
     ofile_Hlist_gr.Close();
 
     cout << endl << "Root cern script: all is ok" << endl;

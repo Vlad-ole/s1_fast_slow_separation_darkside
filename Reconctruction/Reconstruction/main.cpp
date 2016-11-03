@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     const double time_integral_to = 1950 + 700; // ns
     const double time_avr_baseline_to = 1600; // ns
     const int events_per_file = 1000;
-    const int max_files = 1000;
+    const int max_files = 100000;
 
     //fft
     const double time_fft_noise_from = 0;//ns

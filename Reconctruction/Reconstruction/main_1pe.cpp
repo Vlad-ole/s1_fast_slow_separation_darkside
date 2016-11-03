@@ -35,7 +35,7 @@ double get_time_delta(struct timespec timespec_str_before, struct timespec times
     return (timespec_str_after.tv_sec + timespec_str_after.tv_nsec*1e-9 ) - (timespec_str_before.tv_sec + timespec_str_before.tv_nsec*1e-9 );
 }
 
-int main(int argc, char *argv[])
+int main_1pe(int argc, char *argv[])
 {
     struct timespec timespec_str_before, timespec_str_after, timespec_str_total_before, timespec_str_total_after;
     double t_read_file;

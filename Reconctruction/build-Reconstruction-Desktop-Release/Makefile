@@ -48,20 +48,22 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = ../Reconstruction/main.cpp \
-		../Reconstruction/read_file.cpp \
+SOURCES       = ../Reconstruction/read_file.cpp \
 		../Reconstruction/derivative.cpp \
 		../Reconstruction/baseline.cpp \
 		../Reconstruction/integral.cpp \
 		../Reconstruction/fill_canvas.cpp \
-		../Reconstruction/fft.cpp 
-OBJECTS       = main.o \
-		read_file.o \
+		../Reconstruction/fft.cpp \
+		../Reconstruction/main_1pe.cpp \
+		../Reconstruction/main_am.cpp 
+OBJECTS       = read_file.o \
 		derivative.o \
 		baseline.o \
 		integral.o \
 		fill_canvas.o \
-		fft.o
+		fft.o \
+		main_1pe.o \
+		main_am.o
 DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt5/mkspecs/common/unix.conf \
 		/usr/lib64/qt5/mkspecs/common/linux.conf \
@@ -122,13 +124,14 @@ DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		../Reconstruction/baseline.h \
 		../Reconstruction/integral.h \
 		../Reconstruction/fill_canvas.h \
-		../Reconstruction/fft.h ../Reconstruction/main.cpp \
-		../Reconstruction/read_file.cpp \
+		../Reconstruction/fft.h ../Reconstruction/read_file.cpp \
 		../Reconstruction/derivative.cpp \
 		../Reconstruction/baseline.cpp \
 		../Reconstruction/integral.cpp \
 		../Reconstruction/fill_canvas.cpp \
-		../Reconstruction/fft.cpp
+		../Reconstruction/fft.cpp \
+		../Reconstruction/main_1pe.cpp \
+		../Reconstruction/main_am.cpp
 QMAKE_TARGET  = Reconstruction
 DESTDIR       = 
 TARGET        = Reconstruction
@@ -271,7 +274,7 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib64/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents ../Reconstruction/read_file.h ../Reconstruction/derivative.h ../Reconstruction/baseline.h ../Reconstruction/integral.h ../Reconstruction/fill_canvas.h ../Reconstruction/fft.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../Reconstruction/main.cpp ../Reconstruction/read_file.cpp ../Reconstruction/derivative.cpp ../Reconstruction/baseline.cpp ../Reconstruction/integral.cpp ../Reconstruction/fill_canvas.cpp ../Reconstruction/fft.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../Reconstruction/read_file.cpp ../Reconstruction/derivative.cpp ../Reconstruction/baseline.cpp ../Reconstruction/integral.cpp ../Reconstruction/fill_canvas.cpp ../Reconstruction/fft.cpp ../Reconstruction/main_1pe.cpp ../Reconstruction/main_am.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -316,7 +319,42 @@ compiler_clean: compiler_moc_predefs_clean
 
 ####### Compile
 
-main.o: ../Reconstruction/main.cpp ../../../../root/include/TF1.h \
+read_file.o: ../Reconstruction/read_file.cpp ../Reconstruction/read_file.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o read_file.o ../Reconstruction/read_file.cpp
+
+derivative.o: ../Reconstruction/derivative.cpp ../Reconstruction/derivative.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o derivative.o ../Reconstruction/derivative.cpp
+
+baseline.o: ../Reconstruction/baseline.cpp ../Reconstruction/baseline.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o baseline.o ../Reconstruction/baseline.cpp
+
+integral.o: ../Reconstruction/integral.cpp ../Reconstruction/integral.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o integral.o ../Reconstruction/integral.cpp
+
+fill_canvas.o: ../Reconstruction/fill_canvas.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o fill_canvas.o ../Reconstruction/fill_canvas.cpp
+
+fft.o: ../Reconstruction/fft.cpp ../Reconstruction/fft.h \
+		../../../../root/include/TVirtualFFT.h \
+		../../../../root/include/TObject.h \
+		../../../../root/include/Rtypes.h \
+		../../../../root/include/RConfig.h \
+		../../../../root/include/RVersion.h \
+		../../../../root/include/DllImport.h \
+		../../../../root/include/Rtypeinfo.h \
+		../../../../root/include/snprintf.h \
+		../../../../root/include/strlcpy.h \
+		../../../../root/include/TGenericClassInfo.h \
+		../../../../root/include/TSchemaHelper.h \
+		../../../../root/include/TStorage.h \
+		../../../../root/include/TVersionCheck.h \
+		../../../../root/include/Riosfwd.h \
+		../../../../root/include/TBuffer.h \
+		../../../../root/include/TString.h \
+		../../../../root/include/TMathBase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o fft.o ../Reconstruction/fft.cpp
+
+main_1pe.o: ../Reconstruction/main_1pe.cpp ../../../../root/include/TF1.h \
 		../../../../root/include/TFormula.h \
 		../../../../root/include/TNamed.h \
 		../../../../root/include/TObject.h \
@@ -396,46 +434,17 @@ main.o: ../Reconstruction/main.cpp ../../../../root/include/TF1.h \
 		../../../../root/include/TPave.h \
 		../../../../root/include/TBox.h \
 		../../../../root/include/TLine.h \
+		../../../../root/include/TAxis.h \
+		../../../../root/include/TAttAxis.h \
 		../Reconstruction/read_file.h \
 		../Reconstruction/derivative.h \
 		../Reconstruction/baseline.h \
-		../Reconstruction/integral.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../Reconstruction/main.cpp
+		../Reconstruction/integral.h \
+		../Reconstruction/fft.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main_1pe.o ../Reconstruction/main_1pe.cpp
 
-read_file.o: ../Reconstruction/read_file.cpp ../Reconstruction/read_file.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o read_file.o ../Reconstruction/read_file.cpp
-
-derivative.o: ../Reconstruction/derivative.cpp ../Reconstruction/derivative.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o derivative.o ../Reconstruction/derivative.cpp
-
-baseline.o: ../Reconstruction/baseline.cpp ../Reconstruction/baseline.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o baseline.o ../Reconstruction/baseline.cpp
-
-integral.o: ../Reconstruction/integral.cpp ../Reconstruction/integral.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o integral.o ../Reconstruction/integral.cpp
-
-fill_canvas.o: ../Reconstruction/fill_canvas.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o fill_canvas.o ../Reconstruction/fill_canvas.cpp
-
-fft.o: ../Reconstruction/fft.cpp ../Reconstruction/fft.h \
-		../../../../root/include/TVirtualFFT.h \
-		../../../../root/include/TObject.h \
-		../../../../root/include/Rtypes.h \
-		../../../../root/include/RConfig.h \
-		../../../../root/include/RVersion.h \
-		../../../../root/include/DllImport.h \
-		../../../../root/include/Rtypeinfo.h \
-		../../../../root/include/snprintf.h \
-		../../../../root/include/strlcpy.h \
-		../../../../root/include/TGenericClassInfo.h \
-		../../../../root/include/TSchemaHelper.h \
-		../../../../root/include/TStorage.h \
-		../../../../root/include/TVersionCheck.h \
-		../../../../root/include/Riosfwd.h \
-		../../../../root/include/TBuffer.h \
-		../../../../root/include/TString.h \
-		../../../../root/include/TMathBase.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o fft.o ../Reconstruction/fft.cpp
+main_am.o: ../Reconstruction/main_am.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main_am.o ../Reconstruction/main_am.cpp
 
 ####### Install
 

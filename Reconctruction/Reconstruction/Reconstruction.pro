@@ -10,13 +10,14 @@ CONFIG -= app_bundle
 TEMPLATE = app
 
 SOURCES += \
-    main.cpp \
     read_file.cpp \
     derivative.cpp \
     baseline.cpp \
     integral.cpp \
     fill_canvas.cpp \
-    fft.cpp
+    fft.cpp \
+    main_1pe.cpp \
+    main_am.cpp
 
 INCLUDEPATH += "/home/darkside/Vlad_Programs/root/include"
 

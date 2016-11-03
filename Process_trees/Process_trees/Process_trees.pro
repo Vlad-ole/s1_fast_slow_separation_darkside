@@ -11,4 +11,7 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     fft.cpp \
-    canvas.cpp
+    canvas.cpp \
+    main_am.cpp
+
+HEADERS +=

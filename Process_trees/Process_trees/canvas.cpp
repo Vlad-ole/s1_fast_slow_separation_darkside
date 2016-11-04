@@ -2,7 +2,7 @@ void canvasscrollbars_create ()
 {
    //good view - no problems
 
-    TCanvas *c = new TCanvas("c","c");
+   TCanvas *c = new TCanvas("c","c");
    c->Divide(2, 4);
    c->SetCanvasSize(1500, 1500);
    c->SetWindowSize(800, 800);

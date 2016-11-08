@@ -56,7 +56,8 @@ SOURCES       = ../Reconstruction/read_file.cpp \
 		../Reconstruction/fft.cpp \
 		../Reconstruction/main_1pe.cpp \
 		../Reconstruction/main_am.cpp \
-		../Reconstruction/individual_time_amp.cpp 
+		../Reconstruction/individual_time_amp.cpp \
+		../Reconstruction/time_measure.cpp 
 OBJECTS       = read_file.o \
 		derivative.o \
 		baseline.o \
@@ -65,7 +66,8 @@ OBJECTS       = read_file.o \
 		fft.o \
 		main_1pe.o \
 		main_am.o \
-		individual_time_amp.o
+		individual_time_amp.o \
+		time_measure.o
 DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt5/mkspecs/common/unix.conf \
 		/usr/lib64/qt5/mkspecs/common/linux.conf \
@@ -127,7 +129,8 @@ DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		../Reconstruction/integral.h \
 		../Reconstruction/fill_canvas.h \
 		../Reconstruction/fft.h \
-		../Reconstruction/individual_time_amp.h ../Reconstruction/read_file.cpp \
+		../Reconstruction/individual_time_amp.h \
+		../Reconstruction/time_measure.h ../Reconstruction/read_file.cpp \
 		../Reconstruction/derivative.cpp \
 		../Reconstruction/baseline.cpp \
 		../Reconstruction/integral.cpp \
@@ -135,7 +138,8 @@ DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		../Reconstruction/fft.cpp \
 		../Reconstruction/main_1pe.cpp \
 		../Reconstruction/main_am.cpp \
-		../Reconstruction/individual_time_amp.cpp
+		../Reconstruction/individual_time_amp.cpp \
+		../Reconstruction/time_measure.cpp
 QMAKE_TARGET  = Reconstruction
 DESTDIR       = 
 TARGET        = Reconstruction
@@ -277,8 +281,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib64/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../Reconstruction/read_file.h ../Reconstruction/derivative.h ../Reconstruction/baseline.h ../Reconstruction/integral.h ../Reconstruction/fill_canvas.h ../Reconstruction/fft.h ../Reconstruction/individual_time_amp.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../Reconstruction/read_file.cpp ../Reconstruction/derivative.cpp ../Reconstruction/baseline.cpp ../Reconstruction/integral.cpp ../Reconstruction/fill_canvas.cpp ../Reconstruction/fft.cpp ../Reconstruction/main_1pe.cpp ../Reconstruction/main_am.cpp ../Reconstruction/individual_time_amp.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../Reconstruction/read_file.h ../Reconstruction/derivative.h ../Reconstruction/baseline.h ../Reconstruction/integral.h ../Reconstruction/fill_canvas.h ../Reconstruction/fft.h ../Reconstruction/individual_time_amp.h ../Reconstruction/time_measure.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../Reconstruction/read_file.cpp ../Reconstruction/derivative.cpp ../Reconstruction/baseline.cpp ../Reconstruction/integral.cpp ../Reconstruction/fill_canvas.cpp ../Reconstruction/fft.cpp ../Reconstruction/main_1pe.cpp ../Reconstruction/main_am.cpp ../Reconstruction/individual_time_amp.cpp ../Reconstruction/time_measure.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -444,7 +448,8 @@ main_1pe.o: ../Reconstruction/main_1pe.cpp ../../../../root/include/TF1.h \
 		../Reconstruction/derivative.h \
 		../Reconstruction/baseline.h \
 		../Reconstruction/integral.h \
-		../Reconstruction/fft.h
+		../Reconstruction/fft.h \
+		../Reconstruction/time_measure.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main_1pe.o ../Reconstruction/main_1pe.cpp
 
 main_am.o: ../Reconstruction/main_am.cpp ../../../../root/include/TF1.h \
@@ -529,14 +534,20 @@ main_am.o: ../Reconstruction/main_am.cpp ../../../../root/include/TF1.h \
 		../../../../root/include/TLine.h \
 		../../../../root/include/TAxis.h \
 		../../../../root/include/TAttAxis.h \
+		../../../../root/include/TSpectrum.h \
 		../Reconstruction/read_file.h \
 		../Reconstruction/derivative.h \
 		../Reconstruction/baseline.h \
-		../Reconstruction/integral.h
+		../Reconstruction/integral.h \
+		../Reconstruction/individual_time_amp.h \
+		../Reconstruction/time_measure.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main_am.o ../Reconstruction/main_am.cpp
 
 individual_time_amp.o: ../Reconstruction/individual_time_amp.cpp ../Reconstruction/individual_time_amp.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o individual_time_amp.o ../Reconstruction/individual_time_amp.cpp
+
+time_measure.o: ../Reconstruction/time_measure.cpp ../Reconstruction/time_measure.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o time_measure.o ../Reconstruction/time_measure.cpp
 
 ####### Install
 

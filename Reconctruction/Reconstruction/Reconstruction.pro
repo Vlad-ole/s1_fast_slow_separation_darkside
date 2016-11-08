@@ -18,7 +18,8 @@ SOURCES += \
     fft.cpp \
     main_1pe.cpp \
     main_am.cpp \
-    individual_time_amp.cpp
+    individual_time_amp.cpp \
+    time_measure.cpp
 
 INCLUDEPATH += "/home/darkside/Vlad_Programs/root/include"
 
@@ -110,4 +111,5 @@ HEADERS += \
     integral.h \
     fill_canvas.h \
     fft.h \
-    individual_time_amp.h
+    individual_time_amp.h \
+    time_measure.h

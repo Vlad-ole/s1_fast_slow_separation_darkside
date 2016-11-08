@@ -9,10 +9,12 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-SOURCES += main.cpp \
+SOURCES += \
     fft.cpp \
     canvas.cpp \
     main_am.cpp \
-    unfolding.cpp
+    unfolding.cpp \
+    main_1pe.cpp \
+    main.cpp
 
 HEADERS +=

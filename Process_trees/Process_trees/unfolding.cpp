@@ -26,35 +26,27 @@ void unfold()
 
 void unfold_vlad()
 {
-    TSpectrum *s = new TSpectrum();
+    TSpectrum s;
 
     const double time_scale = 0.1;
     const int numberIterations = 10000;
-    const int numberRepetitions = 10;
-    const int boost = 1;
+    const int numberRepetitions = 1;
+    const double boost = 1;
     const double response_rangle_from = 0;
-    const double response_rangle_to = 20;
-//    const Int_t ssize = (int) ((response_rangle_to - response_rangle_from) / time_scale);
-    const Int_t ssize = 250;
+    const Int_t ssize = 700;
 
 
     float source[ssize];
     float response[ssize];
     float xv_response[ssize];
 
-//    TF1 *f_response = new TF1("fb1","TMath::Gaus(x,[0],[1],1)",response_rangle_from,response_rangle_to);
-//    f_response->SetParameters(0,1);
-
-//    TF1 *fb2 = new TF1("fb2","TMath::Gaus(x,[0],[1],1)",response_rangle_from,response_rangle_to);
-//    fb2->SetParameters(5,1);
-
     cout << "ssize = " << ssize << endl;
     for (int i = 0; i < ssize; ++i)
     {
         double time =  i*time_scale + response_rangle_from;
         xv_response[i] = time;
-        response[i] = TMath::Gaus(time, 3);
-        source[i] = TMath::Gaus(time, 5) + TMath::Gaus(time, 15);
+        response[i] = -TMath::Gaus(time, 20);
+        source[i] = -(TMath::Gaus(time, 30) + TMath::Gaus(time, 40));
     }
 
     TCanvas* canv = new TCanvas("c", "c", 0, 0, 1900, 1500);
@@ -76,7 +68,7 @@ void unfold_vlad()
     graph_source->Draw("AP");
 
 
-    s->Deconvolution(source,response,ssize,numberIterations,numberRepetitions,boost);
+    s.Deconvolution(source,response,ssize,numberIterations,numberRepetitions,boost);
 
     TGraph *graph_unfold = new TGraph(ssize, &xv_response[0], &source[0]);
     graph_unfold->SetTitle("unfold signal");

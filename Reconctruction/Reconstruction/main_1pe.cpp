@@ -44,38 +44,48 @@ int main(int argc, char *argv[])
 
     gROOT->SetBatch(kTRUE);
 
+    //run 6061
     //parameters
-    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe/";
-    const string trees_dir = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
-    const int run_id = 6061;
-    const int time_scale = 4;//ns
-    const int der_param = 10; // points
-    const double time_integral_ch0_from = 2050; // ns
-    const double time_integral_ch0_to = 2100; // ns
-    const double time_integral_from = 1950; // ns
-    const double time_integral_to = 1950 + 700; // ns
-    const double time_avr_baseline_to = 1600; // ns
-    const int events_per_file = 1000;
-    const int max_files = 100;
-
-
-//    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am/";
-//    const string trees_dir = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees/";
-//    const int run_id = 6064;
+//    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe/";
+//    const string trees_dir = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
+//    const int run_id = 6061;
 //    const int time_scale = 4;//ns
-//    const int der_param = 10; //points
-//    const double time_integral_from = 1900; // ns
-//    const double time_integral_to = 14900; // ns
+//    const int n_points_savitzky_golay = 21; // points
+//    const double time_integral_ch0_from = 2050; // ns
+//    const double time_integral_ch0_to = 2100; // ns
+//    const double time_integral_from = 1950; // ns
+//    const double time_integral_to = 1950 + 700; // ns
 //    const double time_avr_baseline_to = 1600; // ns
 //    const int events_per_file = 1000;
 //    const int max_files = 100;
+//    //fft
+//    const double time_fft_noise_ch0_from = 0;//ns
+//    const double time_fft_noise_ch0_to = 2000;//ns
+//    const double time_fft_signal_ch0_from = time_integral_ch0_from;
+//    const double time_fft_signal_ch0_to = time_integral_ch0_to;
 
+//    const double time_fft_noise_from = 0;//ns
+//    const double time_fft_noise_to = time_avr_baseline_to;//ns
+//    const double time_fft_signal_from = time_integral_from;
+//    const double time_fft_signal_to = time_integral_to;
 
-
+    //run 6064
+    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am/";
+    const string trees_dir = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees/";
+    const int run_id = 6064;
+    const int time_scale = 4;//ns
+    const int n_points_savitzky_golay = 21; // points
+    const double time_integral_ch0_from = 1900; // ns
+    const double time_integral_ch0_to = 14900;// ns
+    const double time_integral_from = 1900; // ns
+    const double time_integral_to = 14900; // ns
+    const double time_avr_baseline_to = 1600; // ns
+    const int events_per_file = 1000;
+    const int max_files = 100000;
 
     //fft
     const double time_fft_noise_ch0_from = 0;//ns
-    const double time_fft_noise_ch0_to = 2000;//ns
+    const double time_fft_noise_ch0_to = 1600;//ns
     const double time_fft_signal_ch0_from = time_integral_ch0_from;
     const double time_fft_signal_ch0_to = time_integral_ch0_to;
 
@@ -90,6 +100,7 @@ int main(int argc, char *argv[])
     TFile* f_tree = NULL;
     TTree* tree = NULL;
     int counter_f_tree = 0;
+    vector<double> C_i_der = Get_coeff_savitzky_golay(n_points_savitzky_golay);
 
 
     for(int file_i = 0; file_i < max_files; file_i++)
@@ -131,9 +142,9 @@ int main(int argc, char *argv[])
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
         //caculate derivative
-        vector<double> ch0_der = Get_derivative(data[0], der_param);
-        vector<double> ch1_der = Get_derivative(data[1], der_param);
-        vector<double> ch2_der = Get_derivative(data[2], der_param);
+        vector<double> ch0_der = Get_derivative_savitzky_golay(data[0], n_points_savitzky_golay, C_i_der);
+        vector<double> ch1_der = Get_derivative_savitzky_golay(data[1], n_points_savitzky_golay, C_i_der);
+        vector<double> ch2_der = Get_derivative_savitzky_golay(data[2], n_points_savitzky_golay, C_i_der);
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_calculate_der += get_time_delta(timespec_str_before, timespec_str_after);
 
@@ -206,7 +217,7 @@ int main(int argc, char *argv[])
         vector< vector<double> > ch2_fft_amp_spectum_noise = Get_fft_amp_spectrum(data_minus_baseline[2], time_fft_noise_from, time_fft_noise_to, time_scale);
         vector< vector<double> > ch2_fft_amp_spectum_signal = Get_fft_amp_spectrum(data_minus_baseline[2], time_fft_signal_from, time_fft_signal_to, time_scale);
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
-        t_fft = get_time_delta(timespec_str_before, timespec_str_after);
+        t_fft += get_time_delta(timespec_str_before, timespec_str_after);
 
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
@@ -384,10 +395,15 @@ int main(int argc, char *argv[])
             f_tree = TFile::Open(file_tree_oss.str().c_str(), "RECREATE");
             tree = new TTree("t1", "Parser tree");
 
+            tree->Branch("integral_ch0", &integral_ch0, "integral_ch0/D");
             tree->Branch("integral_ch1", &integral_ch1, "integral_ch1/D");
             tree->Branch("integral_ch2", &integral_ch2, "integral_ch2/D");
+
+            tree->Branch("baseline_ch0", &baseline_ch0, "baseline_ch0/D");
             tree->Branch("baseline_ch1", &baseline_ch1, "baseline_ch1/D");
             tree->Branch("baseline_ch2", &baseline_ch2, "baseline_ch2/D");
+
+            tree->Branch("max_abs_amp_ch0", &max_abs_amp_ch0, "max_abs_amp_ch0/D");
             tree->Branch("max_abs_amp_ch1", &max_abs_amp_ch1, "max_abs_amp_ch1/D");
             tree->Branch("max_abs_amp_ch2", &max_abs_amp_ch2, "max_abs_amp_ch2/D");
 

@@ -14,7 +14,6 @@ SOURCES += \
     canvas.cpp \
     main_am.cpp \
     unfolding.cpp \
-    main_1pe.cpp \
-    main.cpp
+    main_1pe.cpp
 
 HEADERS +=

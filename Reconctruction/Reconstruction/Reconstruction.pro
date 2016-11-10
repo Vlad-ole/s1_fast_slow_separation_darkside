@@ -17,9 +17,9 @@ SOURCES += \
     fill_canvas.cpp \
     fft.cpp \
     main_1pe.cpp \
-    main_am.cpp \
     individual_time_amp.cpp \
-    time_measure.cpp
+    time_measure.cpp \
+    main_unfold.cpp
 
 INCLUDEPATH += "/home/darkside/Vlad_Programs/root/include"
 

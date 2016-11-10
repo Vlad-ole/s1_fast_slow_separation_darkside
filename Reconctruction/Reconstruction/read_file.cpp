@@ -54,6 +54,12 @@ vector< vector<double> > Get_response(string file_name, const double trigger_tim
 
     ifstream input_file;
     input_file.open(file_name.c_str());
+    if(!input_file.is_open())
+    {
+        cout << "error in file.open = " << file_name << endl;
+        exit(1);
+    }
+
 
     double ch0, ch1, ch2;
     int counter = 0;

@@ -4,19 +4,19 @@ void ReadTree()
 {
     gROOT->SetBatch(kTRUE); // it's really important to use this line if you save TCanvas in a tree!
 
-//    //read param
-//    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
-//    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_result.root";
-//    const int run_id = 6061;
+    //read param
+    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
+    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_result.root";
+    const int run_id = 6061;
 
-    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees/";
-    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_result.root";
-    const int run_id = 6064;
+//    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees/";
+//    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_result.root";
+//    const int run_id = 6064;
 
 
     //processing params
-    const bool advanced_processing = true;
-    const bool normal_processing = false;
+    const bool advanced_processing = false;
+    const bool normal_processing = true;
     const double time_scale = 4;//ns
 
     TObjArray Hlist_gr(0);
@@ -27,7 +27,7 @@ void ReadTree()
 
     TChain chain("t1");// name of the tree is the argument
     //const int n_max = 22426; //Am
-    const int n_max = 100;//number of files
+    const int n_max = 1;//number of files
     for(int i = 0; i < n_max; i++)
     {
         ostringstream file_tree_oss;
@@ -65,7 +65,7 @@ void ReadTree()
 
     chain.SetMarkerStyle(4);
 
-    //    chain.Draw("max_abs_amp_ch1>>h1(300,0,100)", total_cut);
+//    chain.Draw("integral_ch0>>h2(500,-3500,200)", total_cut);
     //    chain.Draw("integral_ch2>>h2(300,-35000,5000)", total_cut);
 
     //       chain.Draw("integral_ch2>>h2(500,-20000,5000)", total_cut); // >>hsqrt(bins, min, max)
@@ -555,12 +555,16 @@ void ReadTree()
 
     if(normal_processing)
     {
-        const int n_entr = 10;
+        const int n_entr = chain.GetEntries();
         for (int i = 0; i < n_entr; ++i)
         {
             chain.GetEntry(i);
             if(i % 100 == 0) cout << "event = " << i << endl;
-            Hlist_gr.Add( canv->Clone() );
+            if(integral_ch0 > -100)
+            {
+                Hlist_gr.Add( canv->Clone() );
+            }
+
         }
 
         TFile ofile_Hlist_gr(graph_name.c_str(), "RECREATE");

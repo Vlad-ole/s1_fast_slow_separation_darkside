@@ -1,9 +1,9 @@
-void ProcessAm()
+void ReadTree_unfold()
 {
     gROOT->SetBatch(kTRUE);
 
-    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees/";
-    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_result.root";
+    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees_unfold/";
+    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_result_unfold.root";
     const int run_id = 6064;
 
     TObjArray Hlist_gr(0);

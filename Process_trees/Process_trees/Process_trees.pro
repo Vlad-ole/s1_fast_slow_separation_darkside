@@ -12,8 +12,9 @@ TEMPLATE = app
 SOURCES += \
     fft.cpp \
     canvas.cpp \
-    main_am.cpp \
     unfolding.cpp \
-    main_1pe.cpp
+    main_1pe.cpp \
+    main_unfold.cpp \
+    fit_avr_am_signal.cpp
 
 HEADERS +=

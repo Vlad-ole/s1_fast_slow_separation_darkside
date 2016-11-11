@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     //processing params
     const int time_scale = 4;//ns
     const double time_avr_baseline_to = 1600; // ns
-    const double waveform_sign = +1;
+    const double waveform_sign = -1;
 
     const double spe_integral_ch2 = -1484;
     const double spe_integral_ch1 = spe_integral_ch2;
@@ -60,13 +60,15 @@ int main(int argc, char *argv[])
     const double avg_integral_ch0 = -382;//avg_integral_ch0 < spe_integral_ch0 because there are a lot of signals without PMT response
 
     const double time_integral_from = 0;// ns
-    const double time_integral_to = 14900;// ns
+    const double time_integral_to = 7900;// ns
     const double trigger_time = 1900; //ns
 
+    const double time_cut = time_integral_to;
+
     //unfold params
-    const int numberIterations = 1000;
-    const int numberRepetitions = 1;
-    const double boost = 1;
+    const int numberIterations = 100;
+    const int numberRepetitions = 10;
+    const double boost = 1.1;
 
     //write params
     const int events_per_file = 1000;
@@ -93,6 +95,11 @@ int main(int argc, char *argv[])
 
         //read data from binary file
         vector< vector<double> > data = Get_data( f_oss.str() );
+
+        data[0] = vector_cut_time(data[0], time_cut / time_scale);
+        data[1] = vector_cut_time(data[1], time_cut / time_scale);
+        data[2] = vector_cut_time(data[2], time_cut / time_scale);
+
         const int nsamps = data[0].size();
         if(data[0].size() == 0 || data[1].size() == 0 || data[2].size() == 0)//some files can be empty. I do not know why
         {
@@ -124,9 +131,9 @@ int main(int argc, char *argv[])
             cout << "xv was set" << endl;
 
             response = Get_response(response_file_name, trigger_time, time_scale, nsamps);
-            response_ch0 = vector_from_double_to_float( vector_multiply(response[0], -waveform_sign * spe_integral_ch0 / avg_integral_ch0) );
-            response_ch1 = vector_from_double_to_float( vector_multiply(response[1], -waveform_sign * spe_integral_ch1 / avg_integral_ch1) );
-            response_ch2 = vector_from_double_to_float( vector_multiply(response[2], -waveform_sign * spe_integral_ch2 / avg_integral_ch2) );
+            response_ch0 = vector_from_double_to_float( vector_cut_by_sign( vector_multiply(response[0], -waveform_sign * spe_integral_ch0 / avg_integral_ch0) , waveform_sign) );
+            response_ch1 = vector_from_double_to_float( vector_cut_by_sign( vector_multiply(response[1], -waveform_sign * spe_integral_ch1 / avg_integral_ch1) , waveform_sign) );
+            response_ch2 = vector_from_double_to_float( vector_cut_by_sign( vector_multiply(response[2], -waveform_sign * spe_integral_ch2 / avg_integral_ch2) , waveform_sign) );
         }
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_read_file += get_time_delta(timespec_str_before, timespec_str_after);
@@ -153,9 +160,9 @@ int main(int argc, char *argv[])
         TSpectrum s1;
         TSpectrum s2;
 
-        vector<float> source_ch0 = vector_from_double_to_float( vector_subtract(data[0], baseline_ch0) );
-        vector<float> source_ch1 = vector_from_double_to_float( vector_subtract(data[1], baseline_ch1) );
-        vector<float> source_ch2 = vector_from_double_to_float( vector_subtract(data[2], baseline_ch2) );
+        vector<float> source_ch0 = vector_from_double_to_float( vector_cut_by_sign( vector_subtract(data[0], baseline_ch0), waveform_sign ) );
+        vector<float> source_ch1 = vector_from_double_to_float( vector_cut_by_sign( vector_subtract(data[1], baseline_ch1), waveform_sign ) );
+        vector<float> source_ch2 = vector_from_double_to_float( vector_cut_by_sign( vector_subtract(data[2], baseline_ch2), waveform_sign ) );
 
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
@@ -165,6 +172,7 @@ int main(int argc, char *argv[])
         baseline_ch2 = Get_baseline( vector_subtract(data[2], baseline_ch2), (int)(time_avr_baseline_to / time_scale) );
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_calculate_baseline += get_time_delta(timespec_str_before, timespec_str_after);
+
 
         //fill canvas
         TCanvas canv("c", "c", 0, 0, 1900, 1500);

@@ -29,9 +29,9 @@ void unfold_vlad()
     TSpectrum s;
 
     const double time_scale = 0.1;
-    const int numberIterations = 10000;
-    const int numberRepetitions = 1;
-    const double boost = 1;
+    const int numberIterations = 50;
+    const int numberRepetitions = 1000;
+    const double boost = 1.1;
     const double response_rangle_from = 0;
     const Int_t ssize = 700;
 
@@ -41,12 +41,16 @@ void unfold_vlad()
     float xv_response[ssize];
 
     cout << "ssize = " << ssize << endl;
+    TRandom rnd;
     for (int i = 0; i < ssize; ++i)
     {
         double time =  i*time_scale + response_rangle_from;
         xv_response[i] = time;
         response[i] = -TMath::Gaus(time, 20);
-        source[i] = -(TMath::Gaus(time, 30) + TMath::Gaus(time, 40));
+
+        //        double noise = 0.01*TMath::Sin(time);
+        double noise = 0.3 * rnd.Uniform(-1, 0);
+        source[i] = -( TMath::Gaus(time, 30)  + TMath::Gaus(time, 31) ) + noise;
     }
 
     TCanvas* canv = new TCanvas("c", "c", 0, 0, 1900, 1500);
@@ -76,6 +80,11 @@ void unfold_vlad()
     graph_unfold->SetMarkerSize(0.9);
     canv->cd(4);
     graph_unfold->Draw("AP");
+
+//    for (int i = 0; i < ssize; ++i)
+//    {
+//        cout << xv_response[i] << " " << source[i] << endl;
+//    }
 
 }
 

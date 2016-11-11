@@ -15,6 +15,7 @@ SOURCES += \
     unfolding.cpp \
     main_1pe.cpp \
     main_unfold.cpp \
-    fit_avr_am_signal.cpp
+    fit_avr_am_signal.cpp \
+    otonu_help.cpp
 
 HEADERS +=

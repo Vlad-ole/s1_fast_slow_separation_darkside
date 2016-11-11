@@ -149,3 +149,56 @@ vector<double> vector_subtract(vector<double> v, const double value)
 
     return result;
 }
+
+vector<double> vector_cut_by_sign(vector<double> v_origin, const int sign)
+{
+    if(sign == 0)
+    {
+        cout << "incorrect use of vector_cut_by_sign function" << endl;
+        cout << "sign can't be zero" << endl;
+        exit(1);
+    }
+
+    vector<double> result;
+    result.resize(v_origin.size());
+    for (int i = 0; i < v_origin.size(); ++i)
+    {
+        if(sign < 0)
+        {
+            if(v_origin[i] > 0)
+            {
+                result[i] = 0;
+            }
+            else
+            {
+                result[i] = v_origin[i];
+            }
+        }
+        else
+        {
+            if(v_origin[i] < 0)
+            {
+                result[i] = 0;
+            }
+            else
+            {
+                result[i] = v_origin[i];
+            }
+        }
+    }
+
+    return result;
+}
+
+
+vector<double> vector_cut_time(vector<double> v_origin, const int n_points)
+{
+    vector<double> result;
+    result.resize(n_points);
+    for (int i = 0; i < n_points; ++i)
+    {
+        result[i] = v_origin[i];
+    }
+
+    return result;
+}

@@ -202,3 +202,43 @@ vector<double> vector_cut_time(vector<double> v_origin, const int n_points)
 
     return result;
 }
+
+
+vector<double> vector_cut_right_value(vector<double> v_origin, const double value)
+{
+    vector<double> result;
+
+    for(int i = 0; i < v_origin.size(); ++i)
+    {
+        if(v_origin[i] < value)
+        {
+            result.push_back(v_origin[i]);
+        }
+    }
+
+    return result;
+}
+
+vector< vector<double> > vector_vector_cut_x_value(vector< vector<double> > v_origin, const double value)
+{
+    vector< vector<double> > result;
+    result.resize(3);
+
+    for(int i = 0; i < v_origin[0].size(); ++i)
+    {
+        result[0].push_back(v_origin[0][i]);
+        result[2].push_back(v_origin[2][i]);
+
+        if(v_origin[0][i] < value)
+        {
+
+            result[1].push_back(v_origin[1][i]);
+        }
+        else
+        {
+            result[1].push_back(0);
+        }
+    }
+
+    return result;
+}

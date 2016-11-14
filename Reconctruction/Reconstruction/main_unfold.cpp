@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     //processing params
     const int time_scale = 4;//ns
     const double time_avr_baseline_to = 1600; // ns
-    const double waveform_sign = -1;
+    const double waveform_sign = 1;
 
     const double spe_integral_ch2 = -1484;
     const double spe_integral_ch1 = spe_integral_ch2;
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     const double time_cut = time_integral_to;
 
     //unfold params
-    const int numberIterations = 100;
+    const int numberIterations = 20;
     const int numberRepetitions = 10;
     const double boost = 1.1;
 
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
         //create file name to read binary file
         ostringstream f_oss;
         f_oss << dir_name << "Run" << setfill('0') << setw(6) << run_id << "_event" << setfill('0') << setw(7) << file_i << ".out";
-        if (file_i % 100 == 0) cout << f_oss.str() << endl;
+        if (file_i % 100 == 0 || (t_unfolding / file_i > 0.1) ) cout << f_oss.str() << endl;
 
         //read data from binary file
         vector< vector<double> > data = Get_data( f_oss.str() );
@@ -264,27 +264,27 @@ int main(int argc, char *argv[])
 
         //unfolding part 2
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
-        s0.Deconvolution(&source_ch0[0],&response_ch0[0],nsamps,numberIterations,numberRepetitions,boost);
-        s1.Deconvolution(&source_ch1[0],&response_ch1[0],nsamps,numberIterations,numberRepetitions,boost);
+//        s0.Deconvolution(&source_ch0[0],&response_ch0[0],nsamps,numberIterations,numberRepetitions,boost);
+//        s1.Deconvolution(&source_ch1[0],&response_ch1[0],nsamps,numberIterations,numberRepetitions,boost);
         s2.Deconvolution(&source_ch2[0],&response_ch2[0],nsamps,numberIterations,numberRepetitions,boost);
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_unfolding += get_time_delta(timespec_str_before, timespec_str_after);
 
-        //cd7
-        TGraph graph_cd7(nsamps, &xv_response[0], &source_ch0[0]);
-        graph_cd7.SetTitle("unfolded signal (Channel 0, PMT)");
-        graph_cd7.GetXaxis()->SetTitle("time [ns]");
-        graph_cd7.GetYaxis()->SetTitle("amplitude[a.u.]");
-        canv.cd(7);
-        graph_cd7.Draw();
+//        //cd7
+//        TGraph graph_cd7(nsamps, &xv_response[0], &source_ch0[0]);
+//        graph_cd7.SetTitle("unfolded signal (Channel 0, PMT)");
+//        graph_cd7.GetXaxis()->SetTitle("time [ns]");
+//        graph_cd7.GetYaxis()->SetTitle("amplitude[a.u.]");
+//        canv.cd(7);
+//        graph_cd7.Draw();
 
-        //cd8
-        TGraph graph_cd8(nsamps, &xv_response[0], &source_ch1[0]);
-        graph_cd8.SetTitle("unfolded signal (Channel 1, SiPM)");
-        graph_cd8.GetXaxis()->SetTitle("time [ns]");
-        graph_cd8.GetYaxis()->SetTitle("amplitude[a.u.]");
-        canv.cd(8);
-        graph_cd8.Draw();
+//        //cd8
+//        TGraph graph_cd8(nsamps, &xv_response[0], &source_ch1[0]);
+//        graph_cd8.SetTitle("unfolded signal (Channel 1, SiPM)");
+//        graph_cd8.GetXaxis()->SetTitle("time [ns]");
+//        graph_cd8.GetYaxis()->SetTitle("amplitude[a.u.]");
+//        canv.cd(8);
+//        graph_cd8.Draw();
 
         //cd9
         TGraph graph_cd9(nsamps, &xv_response[0], &source_ch2[0]);

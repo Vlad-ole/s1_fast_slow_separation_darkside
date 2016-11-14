@@ -556,11 +556,11 @@ void ReadTree()
     if(normal_processing)
     {
         const int n_entr = chain.GetEntries();
-        for (int i = 0; i < n_entr; ++i)
+        for (int i = 0; i < 100; ++i)
         {
             chain.GetEntry(i);
             if(i % 100 == 0) cout << "event = " << i << endl;
-            if(integral_ch0 > -100)
+            if(true)
             {
                 Hlist_gr.Add( canv->Clone() );
             }

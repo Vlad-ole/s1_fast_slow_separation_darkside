@@ -1,7 +1,7 @@
 using namespace RooFit;
 
 const int n_photons = 300;
-const int n_events = 5000;
+const int n_events = 100;
 
 
 int counter(RooDataSet* data, double t_from, double t_to)
@@ -33,31 +33,6 @@ void estimate_sigma()
     RooRealVar frac("frac","fast fraction",0.70);
     RooAddPdf sum_pdf("model","model",RooArgList(exp_pdf_fast,exp_pdf_slow),frac);
 
-//    RooDataSet* data = sum_pdf.generate(t,n_photons);
-//    RooPlot* tframe = t.frame(Bins(800));
-//    data->plotOn(tframe);
-//    sum_pdf.plotOn(tframe,LineColor(kRed));
-//    tframe->Draw();
-
-//    int n_fast = counter(data, 0, 10);
-//    int n_total = counter(data, 0, 8000);
-
-//    cout << "n fast = " << n_fast << endl;
-//    cout << "n total = " << n_total << endl;
-//    cout << "ratio = " << (double(n_fast)) / n_total << endl << endl;
-
-
-//    //binned hist
-//    TH1F *h1 = new TH1F("h1", "simulation ratio", 1000, 0, 1);
-//    for (int i = 0; i < n_events; ++i)
-//    {
-//        RooDataSet* data = sum_pdf.generate(t,n_photons);
-//        int n_fast = counter(data, 0, 15);
-//        int n_total = counter(data, 0, 8000);
-//        h1->Fill( (double(n_fast)) / n_total );
-//    }
-//    h1->Draw();
-
     //unbinned hist
     RooRealVar ratio("ratio","ratio",0.3, 0, 1);
     RooDataSet *data_ratio = new RooDataSet("data_ratio","data_ratio",ratio);
@@ -76,10 +51,11 @@ void estimate_sigma()
 
 //    ratio.setRange("Rfull", 0, 0.9);
 //    gauss.fitTo(*data_ratio, Range("Rfull"),Save());
+     gauss.fitTo(*data_ratio);
 
     RooPlot* ratio_frame = ratio.frame(Title("Unbinned fit"));
     data_ratio->plotOn(ratio_frame, Binning(100));
-    gauss.fitTo(*data_ratio);
+
     gauss.plotOn(ratio_frame);
     ratio_frame->Draw();
 
@@ -87,9 +63,6 @@ void estimate_sigma()
     mean.Print();
     sigma.Print();
     cout << endl;
-
-
-
 
 
     t_stopwatch.Stop();

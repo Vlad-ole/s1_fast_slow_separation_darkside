@@ -18,6 +18,11 @@ SOURCES += \
     fit_avr_am_signal.cpp \
     otonu_help.cpp \
     test_vector.cpp \
-    graph.cpp
+    test_parse.cpp \
+    graph_tree.cpp \
+    graph_simulation.cpp \
+    graph_real.cpp \
+    sigma_estimation.cpp \
+    graph_sep_prob.cpp
 
 HEADERS +=

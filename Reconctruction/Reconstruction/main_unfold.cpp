@@ -26,6 +26,7 @@
 #include "integral.h"
 #include "individual_time_amp.h"
 #include "time_measure.h"
+#include "fft.h"
 
 
 using namespace std;
@@ -40,10 +41,12 @@ int main(int argc, char *argv[])
     clock_gettime(CLOCK_REALTIME, &timespec_str_total_before);
 
     //read params
-    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am/";
-    const string trees_dir = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees_unfold/";
+//    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am/";
+//    const string trees_dir = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees_unfold/";
+    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6053_bkg/";
+    const string trees_dir = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6053_bkg_trees_unfold/";
     const string response_file_name = "/home/darkside/Vlad_Programs/Physical_results/avg_signal_1pe.txt";
-    const int run_id = 6064;
+    const int run_id = 6053;
     const int max_files = 100000;
 
     //processing params
@@ -65,13 +68,38 @@ int main(int argc, char *argv[])
 
     const double time_cut = time_integral_to;
 
+    //integral intervals for n/g separation
+    const double time_integral_unfold_fast_pmt_from = 1900;
+    const double time_integral_unfold_fast_pmt_to = 2020;
+
+    const double time_integral_unfold_total_pmt_from = time_integral_unfold_fast_pmt_from;
+    const double time_integral_unfold_total_pmt_to = time_integral_to;
+
+    const double time_integral_unfold_fast_sipm_from = time_integral_unfold_fast_pmt_from;
+    const double time_integral_unfold_fast_sipm_to = 2200;
+
+    const double time_integral_unfold_total_sipm_from = time_integral_unfold_fast_pmt_from;
+    const double time_integral_unfold_total_sipm_to = time_integral_to;
+
+
+    //fft
+    const double time_fft_from = 0;
+    const double time_fft_to = time_integral_to;
+    const double cut_frequency = 20;//MHz
+
     //unfold params
     const int numberIterations = 100;
     const int numberRepetitions = 1;
     const double boost = 1.0;
 
+    //TPad params
+    const double pad_x_1 = 0.7;
+    const double pad_y_1 = 0.7;
+    const double pad_x_2 = 1;
+    const double pad_y_2 = 1;
+
     //write params
-    const int events_per_file = 1000;
+    const int events_per_file = 50;
 
     //
     vector<double> xv_double;
@@ -103,12 +131,13 @@ int main(int argc, char *argv[])
             cout << "data[2].size() = " << data[2].size() << endl;
             continue;
         }
-
+        //if x > time_cut then stop to fill vector (in order to minimize CPU time)
         data[0] = vector_cut_time(data[0], time_cut / time_scale);
         data[1] = vector_cut_time(data[1], time_cut / time_scale);
         data[2] = vector_cut_time(data[2], time_cut / time_scale);
         const int nsamps = data[0].size();
 
+        //it is better to work with positive waveforms
         if(waveform_sign > 0)
         {
             data[0] = vector_multiply(data[0], -waveform_sign);
@@ -154,21 +183,47 @@ int main(int argc, char *argv[])
         integral_ch1 = Get_integral(data[1], baseline_ch1, time_scale, time_integral_from, time_integral_to);
         integral_ch2 = Get_integral(data[2], baseline_ch2, time_scale, time_integral_from, time_integral_to);
 
+        //subtract baseline
+        data[0] = vector_subtract(data[0], baseline_ch0);
+        data[1] = vector_subtract(data[1], baseline_ch1);
+        data[2] = vector_subtract(data[2], baseline_ch2);
+
+
+//        //fft & ifft
+//        vector< vector<double> > ch0_fft = Get_fft_amp_spectrum(data[0], time_fft_from, time_fft_to, time_scale);
+//        vector< vector<double> > ch1_fft = Get_fft_amp_spectrum(data[1], time_fft_from, time_fft_to, time_scale);
+//        vector< vector<double> > ch2_fft = Get_fft_amp_spectrum(data[2], time_fft_from, time_fft_to, time_scale);
+
+//        vector< vector<double> > ch0_fft_cut = vector_vector_cut_x_value(ch0_fft, cut_frequency);
+//        vector< vector<double> > ch1_fft_cut = vector_vector_cut_x_value(ch1_fft, cut_frequency);
+//        vector< vector<double> > ch2_fft_cut = vector_vector_cut_x_value(ch2_fft, cut_frequency);
+
+//        vector< vector<double> > ch0_ifft = Get_ifft(ch0_fft_cut, nsamps, time_scale);
+//        vector< vector<double> > ch1_ifft = Get_ifft(ch1_fft_cut, nsamps, time_scale);
+//        vector< vector<double> > ch2_ifft = Get_ifft(ch2_fft_cut, nsamps, time_scale);
+
+
         //unfolding part 1
         TSpectrum s0;
         TSpectrum s1;
         TSpectrum s2;
 
-        vector<float> source_ch0 = vector_from_double_to_float( vector_cut_by_sign( vector_subtract(data[0], baseline_ch0), waveform_sign ) );
-        vector<float> source_ch1 = vector_from_double_to_float( vector_cut_by_sign( vector_subtract(data[1], baseline_ch1), waveform_sign ) );
-        vector<float> source_ch2 = vector_from_double_to_float( vector_cut_by_sign( vector_subtract(data[2], baseline_ch2), waveform_sign ) );
+        //unfold algorithm works correctly only if all data points have the same sign. I do not know why
+        vector<float> source_ch0 = vector_from_double_to_float( vector_cut_by_sign( data[0], waveform_sign ) );
+        vector<float> source_ch1 = vector_from_double_to_float( vector_cut_by_sign( data[1], waveform_sign ) );
+        vector<float> source_ch2 = vector_from_double_to_float( vector_cut_by_sign( data[2], waveform_sign ) );
+
+        //if you want to use fft
+        //        vector<float> source_ch0 = vector_from_double_to_float( vector_cut_by_sign(  ch0_ifft[1], waveform_sign ) );
+        //        vector<float> source_ch1 = vector_from_double_to_float( vector_cut_by_sign(  ch1_ifft[1], waveform_sign ) );
+        //        vector<float> source_ch2 = vector_from_double_to_float( vector_cut_by_sign(  ch2_ifft[1], waveform_sign ) );
 
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
-        //calcucate baseline for data minus baseline
-        baseline_ch0 = Get_baseline( vector_subtract(data[0], baseline_ch0), (int)(time_avr_baseline_to / time_scale) );
-        baseline_ch1 = Get_baseline( vector_subtract(data[1], baseline_ch1), (int)(time_avr_baseline_to / time_scale) );
-        baseline_ch2 = Get_baseline( vector_subtract(data[2], baseline_ch2), (int)(time_avr_baseline_to / time_scale) );
+        //calcucate baseline for data minus baseline. Just to be sure that I found baseline correctly
+        baseline_ch0 = Get_baseline( data[0], (int)(time_avr_baseline_to / time_scale) );
+        baseline_ch1 = Get_baseline( data[1], (int)(time_avr_baseline_to / time_scale) );
+        baseline_ch2 = Get_baseline( data[2], (int)(time_avr_baseline_to / time_scale) );
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_calculate_baseline += get_time_delta(timespec_str_before, timespec_str_after);
 
@@ -217,7 +272,7 @@ int main(int argc, char *argv[])
 
         string text_cd4_integral = "integral[pe] = " + to_string(integral_ch0 / spe_integral_ch0);
         string text_cd4_baseline = "baseline = " + to_string(baseline_ch0);
-        TPaveText pt_cd4(0.8,0.8,1,1,"nbNDC");
+        TPaveText pt_cd4(pad_x_1,pad_y_1,pad_x_2,pad_y_2,"nbNDC");
         pt_cd4.AddText(text_cd4_integral.c_str());
         pt_cd4.AddText(text_cd4_baseline.c_str());
         pt_cd4.Draw();
@@ -237,7 +292,7 @@ int main(int argc, char *argv[])
 
         string text_cd5_integral = "integral[pe] = " + to_string(integral_ch1 / spe_integral_ch1);
         string text_cd5_baseline = "baseline = " + to_string(baseline_ch1);
-        TPaveText pt_cd5(0.8,0.8,1,1,"nbNDC");
+        TPaveText pt_cd5(pad_x_1,pad_y_1,pad_x_2,pad_y_2,"nbNDC");
         pt_cd5.AddText(text_cd5_integral.c_str());
         pt_cd5.AddText(text_cd5_baseline.c_str());
         pt_cd5.Draw();
@@ -250,13 +305,21 @@ int main(int argc, char *argv[])
         canv.cd(6);
         graph_cd6.Draw();
 
+//        TGraph graph_cd6_2(nsamps, &ch2_ifft[0][0], &ch2_ifft[1][0]);
+//        graph_cd6_2.Draw("same pl");
+//        graph_cd6_2.SetLineStyle(2);
+//        graph_cd6_2.SetLineColor(kBlue);
+//        graph_cd6_2.SetMarkerStyle(20);
+//        graph_cd6_2.SetMarkerSize(1);
+//        graph_cd6_2.SetMarkerColor(kBlue);
+
         TF1 tf1_baseline_cd6("tf1_baseline_ch2","[0]",0,time_scale*nsamps);
         tf1_baseline_cd6.SetParameter(0,baseline_ch2);
         tf1_baseline_cd6.Draw("same");
 
         string text_cd6_integral = "integral[pe] = " + to_string(integral_ch2 / spe_integral_ch2);
         string text_cd6_baseline = "baseline = " + to_string(baseline_ch2);
-        TPaveText pt_cd6(0.8,0.8,1,1,"nbNDC");
+        TPaveText pt_cd6(pad_x_1,pad_y_1,pad_x_2,pad_y_2,"nbNDC");
         pt_cd6.AddText(text_cd6_integral.c_str());
         pt_cd6.AddText(text_cd6_baseline.c_str());
         pt_cd6.Draw();
@@ -264,10 +327,19 @@ int main(int argc, char *argv[])
         //unfolding part 2
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
         s0.Deconvolution(&source_ch0[0],&response_ch0[0],nsamps,numberIterations,numberRepetitions,boost);
-//        s1.Deconvolution(&source_ch1[0],&response_ch1[0],nsamps,numberIterations,numberRepetitions,boost);
+        s1.Deconvolution(&source_ch1[0],&response_ch1[0],nsamps,numberIterations,numberRepetitions,boost);
         s2.Deconvolution(&source_ch2[0],&response_ch2[0],nsamps,numberIterations,numberRepetitions,boost);
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_unfolding += get_time_delta(timespec_str_before, timespec_str_after);
+
+        //calculate integrals to n/g separation
+        double integral_ch0_unfold_fast = Get_integral(vector_from_float_to_double(source_ch0), 0, time_scale, time_integral_unfold_fast_pmt_from, time_integral_unfold_fast_pmt_to);
+        double integral_ch1_unfold_fast = Get_integral(vector_from_float_to_double(source_ch1), 0, time_scale, time_integral_unfold_fast_sipm_from, time_integral_unfold_fast_sipm_to);
+        double integral_ch2_unfold_fast = Get_integral(vector_from_float_to_double(source_ch2), 0, time_scale, time_integral_unfold_fast_sipm_from, time_integral_unfold_fast_sipm_to);
+
+        double integral_ch0_unfold_total = Get_integral(vector_from_float_to_double(source_ch0), 0, time_scale, time_integral_unfold_total_pmt_from, time_integral_unfold_total_pmt_to);
+        double integral_ch1_unfold_total = Get_integral(vector_from_float_to_double(source_ch1), 0, time_scale, time_integral_unfold_total_sipm_from, time_integral_unfold_total_sipm_to);
+        double integral_ch2_unfold_total = Get_integral(vector_from_float_to_double(source_ch2), 0, time_scale, time_integral_unfold_total_sipm_from, time_integral_unfold_total_sipm_to);
 
         //cd7
         TGraph graph_cd7(nsamps, &xv_response[0], &source_ch0[0]);
@@ -277,13 +349,31 @@ int main(int argc, char *argv[])
         canv.cd(7);
         graph_cd7.Draw();
 
-////        //cd8
-////        TGraph graph_cd8(nsamps, &xv_response[0], &source_ch1[0]);
-////        graph_cd8.SetTitle("unfolded signal (Channel 1, SiPM)");
-////        graph_cd8.GetXaxis()->SetTitle("time [ns]");
-////        graph_cd8.GetYaxis()->SetTitle("amplitude[a.u.]");
-////        canv.cd(8);
-////        graph_cd8.Draw();
+        string text_cd7_integral = "integral[pe] = " + to_string(integral_ch0_unfold_total / spe_integral_ch0);
+        string text_cd7_integral_delta_ratio = "#frac{int_orig - int_unfold}{int_orig}[%] = " + to_string( 100*(integral_ch0 - integral_ch0_unfold_total)/integral_ch0 );
+        string text_cd7_separation_ratio = "#frac{int_fast}{int_total} = " + to_string(integral_ch0_unfold_fast / integral_ch0_unfold_total);
+        TPaveText pt_cd7(pad_x_1,pad_y_1,pad_x_2,pad_y_2,"nbNDC");
+        pt_cd7.AddText(text_cd7_integral.c_str());
+        pt_cd7.AddText(text_cd7_integral_delta_ratio.c_str());
+        pt_cd7.AddText(text_cd7_separation_ratio.c_str());
+        pt_cd7.Draw();
+
+        //cd8
+        TGraph graph_cd8(nsamps, &xv_response[0], &source_ch1[0]);
+        graph_cd8.SetTitle("unfolded signal (Channel 1, SiPM)");
+        graph_cd8.GetXaxis()->SetTitle("time [ns]");
+        graph_cd8.GetYaxis()->SetTitle("amplitude[a.u.]");
+        canv.cd(8);
+        graph_cd8.Draw();
+
+        string text_cd8_integral = "integral[pe] = " + to_string(integral_ch1_unfold_total / spe_integral_ch1);
+        string text_cd8_integral_delta_ratio = "#frac{int_orig - int_unfold}{int_orig}[%] = " + to_string( 100*(integral_ch1 - integral_ch1_unfold_total)/integral_ch1 );
+        string text_cd8_separation_ratio = "#frac{int_fast}{int_total} = " + to_string(integral_ch1_unfold_fast / integral_ch1_unfold_total);
+        TPaveText pt_cd8(pad_x_1,pad_y_1,pad_x_2,pad_y_2,"nbNDC");
+        pt_cd8.AddText(text_cd8_integral.c_str());
+        pt_cd8.AddText(text_cd8_integral_delta_ratio.c_str());
+        pt_cd8.AddText(text_cd8_separation_ratio.c_str());
+        pt_cd8.Draw();
 
         //cd9
         TGraph graph_cd9(nsamps, &xv_response[0], &source_ch2[0]);
@@ -293,27 +383,14 @@ int main(int argc, char *argv[])
         canv.cd(9);
         graph_cd9.Draw();
 
-////        //cd2
-////        TGraph graph_ch2(nsamps, &xv_double[0], &data[2][0]);
-////        graph_ch2.SetTitle("original (Channel 2, SiPM)");
-////        graph_ch2.GetXaxis()->SetTitle("time [ns]");
-////        graph_ch2.GetYaxis()->SetTitle("amplitude[channels]");
-////        canv.cd(2);
-////        graph_ch2.Draw();
-
-////        TF1 tf1_baseline_ch2("tf1_baseline_ch2","[0]",0,time_scale*nsamps);
-////        tf1_baseline_ch2.SetParameter(0,baseline_ch2);
-////        tf1_baseline_ch2.Draw("same");
-
-////        string text_cd2_integral = "integral[pe] = " + to_string(integral_ch2 / spe_integral_ch2);
-////        string text_cd2_baseline = "baseline = " + to_string(baseline_ch2);
-////        TPaveText pt_cd2(0.8,0.8,1,1,"nbNDC");
-////        pt_cd2.AddText(text_cd2_integral.c_str());
-////        pt_cd2.AddText(text_cd2_baseline.c_str());
-////        pt_cd2.Draw();
-
-
-
+        string text_cd9_integral = "integral[pe] = " + to_string(integral_ch2_unfold_total / spe_integral_ch2);
+        string text_cd9_integral_delta_ratio = "#frac{int_orig - int_unfold}{int_orig}[%] = " + to_string( 100*(integral_ch2 - integral_ch2_unfold_total)/integral_ch2 );
+        string text_cd9_separation_ratio = "#frac{int_fast}{int_total} = " + to_string(integral_ch2_unfold_fast / integral_ch2_unfold_total);
+        TPaveText pt_cd9(pad_x_1,pad_y_1,pad_x_2,pad_y_2,"nbNDC");
+        pt_cd9.AddText(text_cd9_integral.c_str());
+        pt_cd9.AddText(text_cd9_integral_delta_ratio.c_str());
+        pt_cd9.AddText(text_cd9_separation_ratio.c_str());
+        pt_cd9.Draw();
 
         if(file_i % events_per_file == 0)
         {
@@ -325,15 +402,26 @@ int main(int argc, char *argv[])
             f_tree = TFile::Open(file_tree_oss.str().c_str(), "RECREATE");
             tree = new TTree("t1", "Parser tree");
 
+            tree->Branch("integral_ch0", &integral_ch0, "integral_ch0/D");
             tree->Branch("integral_ch1", &integral_ch1, "integral_ch1/D");
             tree->Branch("integral_ch2", &integral_ch2, "integral_ch2/D");
+
+            tree->Branch("integral_ch0_unfold_total", &integral_ch0_unfold_total, "integral_ch0_unfold_total/D");
+            tree->Branch("integral_ch1_unfold_total", &integral_ch1_unfold_total, "integral_ch1_unfold_total/D");
+            tree->Branch("integral_ch2_unfold_total", &integral_ch2_unfold_total, "integral_ch2_unfold_total/D");
+
+            tree->Branch("integral_ch0_unfold_fast", &integral_ch0_unfold_fast, "integral_ch0_unfold_fast/D");
+            tree->Branch("integral_ch1_unfold_fast", &integral_ch1_unfold_fast, "integral_ch1_unfold_fast/D");
+            tree->Branch("integral_ch2_unfold_fast", &integral_ch2_unfold_fast, "integral_ch2_unfold_fast/D");
+
+            tree->Branch("baseline_ch0", &baseline_ch0, "baseline_ch0/D");
             tree->Branch("baseline_ch1", &baseline_ch1, "baseline_ch1/D");
             tree->Branch("baseline_ch2", &baseline_ch2, "baseline_ch2/D");
 
             tree->Branch("canvas_tr", "TCanvas", &canv);
         }
 
-        tree->Fill();
+        tree->Fill();//there was crash. memory leak may be. Or problem with empty files. I should solve...
         if(file_i % events_per_file == events_per_file-1) f_tree->Write();//save list of trees
         if(file_i % events_per_file == events_per_file-1)
         {
@@ -365,4 +453,5 @@ int main(int argc, char *argv[])
 
     cout << endl << "all is ok" << endl;
     return 0;
+
 }

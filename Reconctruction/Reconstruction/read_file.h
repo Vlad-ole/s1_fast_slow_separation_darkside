@@ -13,6 +13,7 @@ vector<double> vector_from_int_to_double(vector<int>);
 vector<double> vector_multiply(vector<double> v, const double value);
 vector<double> vector_subtract(vector<double> v, const double value);
 vector<float> vector_from_double_to_float(vector<double>);
+vector<double> vector_from_float_to_double(vector<float>);
 vector<double> vector_cut_by_sign(vector<double> v_origin, const int sign);
 vector<double> vector_cut_time(vector<double> v_origin, const int n_points);
 vector<double> vector_cut_right_value(vector<double> v_origin, const double value);

@@ -242,3 +242,16 @@ vector< vector<double> > vector_vector_cut_x_value(vector< vector<double> > v_or
 
     return result;
 }
+
+
+vector<double> vector_from_float_to_double(vector<float> vector_float)
+{
+    vector<double> vector_double;
+    vector_double.resize( vector_float.size() );
+    for (int i = 0; i < vector_float.size(); ++i)
+    {
+        vector_double[i] = vector_float[i];
+    }
+
+    return vector_double;
+}

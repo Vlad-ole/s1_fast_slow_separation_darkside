@@ -60,15 +60,15 @@ void unfold_vlad()
     const int ssize = max_time / time_scale;
 //    const int ssize = 700;
 
-    const int numberIterations = 10;
-    const int numberRepetitions = 10;
+    const int numberIterations = 8;
+    const int numberRepetitions = 125;
     const double boost = 1.1;
     const bool is_RL = false;
 
     const double time_from = 0;
     const double time_to = ssize * time_scale;
 
-    const int n_fake_repetitions = 1;
+    const int n_fake_repetitions = 100;
 //    float source[ssize];
 //    float response[ssize];
 //    float unfold_source[ssize];
@@ -99,7 +99,8 @@ void unfold_vlad()
 
         //        double noise = 0.01*TMath::Sin(time);
         double noise = 0.00 * rnd.Uniform(0, 1);
-        source[i] = ( TMath::Gaus(time, 30)  + 0.2*TMath::Gaus(time, 33) ) + noise;
+        source[i] =  TMath::Gaus(time, 30)  + 0.2*TMath::Gaus(time, 33);
+//                      + 0.1*TMath::Gaus(time, 36) + 0.05*TMath::Gaus(time, 39) + 0.5*TMath::Gaus(time, 42) ) + noise;
         unfold_source[i] = source[i];
     }
 

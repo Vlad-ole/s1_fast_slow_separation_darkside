@@ -23,6 +23,8 @@ SOURCES += \
     graph_simulation.cpp \
     graph_real.cpp \
     sigma_estimation.cpp \
-    graph_sep_prob.cpp
+    graph_sep_prob.cpp \
+    read_slices.cpp \
+    graph_sigma_comparison.cpp
 
 HEADERS +=

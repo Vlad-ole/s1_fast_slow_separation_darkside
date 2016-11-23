@@ -23,15 +23,18 @@ double Get_overlapped_area(const double m1, const double s1, const double m2, co
 void DrawGraph()
 {
     const string file_name = "/home/darkside/Vlad_Programs/Physical_results/sep_prob_simulation.txt";
+    const bool is_log_scale = true;
 
-    const int n_parts = 2;
+    const int n_parts = 3;
     vector< vector<double> > time_of_right_edge;
     vector< vector<double> > mean;
     vector< vector<double> > sigma;
+    vector< vector<double> > N_ph;
 
     time_of_right_edge.resize(n_parts);
     mean.resize(n_parts);
     sigma.resize(n_parts);
+    N_ph.resize(n_parts);
 
     ifstream input_file;
     input_file.open(file_name.c_str());
@@ -48,25 +51,37 @@ void DrawGraph()
         if (line[0] != "#" )
         {
             std::istringstream iss(line);
-            int id;
+            int id, N_ph_i;
             double time_of_right_edge_d, mean_d, sigma_d; // The number in the line
 
             //while the iss is a number
-            while ((iss >> id >> time_of_right_edge_d >> mean_d >> sigma_d))
+            while ((iss >> id >> time_of_right_edge_d >> mean_d >> sigma_d >> N_ph_i))
             {
-                if(id == 1)//fill part 1
+                if(id == 3)
                 {
                     time_of_right_edge[0].push_back(time_of_right_edge_d);
                     mean[0].push_back(mean_d);
                     sigma[0].push_back(sigma_d);
+                    N_ph[0].push_back(N_ph_i);
                 }
 
-                if(id == 2)//fill part 2
+                if(id == 4)
                 {
                     time_of_right_edge[1].push_back(time_of_right_edge_d);
                     mean[1].push_back(mean_d);
                     sigma[1].push_back(sigma_d);
+                    N_ph[1].push_back(N_ph_i);
                 }
+
+                if(id == 5)
+                {
+                    time_of_right_edge[2].push_back(time_of_right_edge_d);
+                    mean[2].push_back(mean_d);
+                    sigma[2].push_back(sigma_d);
+                    N_ph[2].push_back(N_ph_i);
+                }
+
+
 
             }
         }
@@ -84,12 +99,15 @@ void DrawGraph()
         cout << "overlapped_area " << i << " = " << overlapped_area[i] << endl;
     }
 
-    TCanvas *c = new TCanvas("c","simulation. PDF = a*pdf_fast(7ns) + (1 - a)*pdf_slow(1700ns)");
+    TCanvas *c = new TCanvas("c","simulation. PDF = a*pdf_fast(7ns) + (1 - a)*pdf_slow(1700ns). Guass(sigma = 33 ns) response.");
     c->Divide(2,2);
 
     c->cd(1);
-    TPad *pad_cd1 = (TPad*)c->GetListOfPrimitives()->FindObject("c_1");
-    pad_cd1->SetLogx();
+    if(is_log_scale)
+    {
+        TPad *pad_cd1 = (TPad*)c->GetListOfPrimitives()->FindObject("c_1");
+        pad_cd1->SetLogx();
+    }
     TGraph *gr_cd1 = new TGraph(time_of_right_edge[0].size(), &time_of_right_edge[0][0], &mean[0][0]);
     gr_cd1->SetName("gr_cd1");
 //    gr_cd1->GetYaxis()->SetRangeUser(1E-3,1);
@@ -115,8 +133,11 @@ void DrawGraph()
 
 
     c->cd(2);
-    TPad *pad_cd2 = (TPad*)c->GetListOfPrimitives()->FindObject("c_2");
-    pad_cd2->SetLogx();
+    if(is_log_scale)
+    {
+        TPad *pad_cd2 = (TPad*)c->GetListOfPrimitives()->FindObject("c_2");
+        pad_cd2->SetLogx();
+    }
     TGraph *gr_cd2 = new TGraph(time_of_right_edge[0].size(), &time_of_right_edge[0][0], &sigma[0][0]);
     gr_cd2->SetName("gr_cd2");
 //    gr_cd1->GetYaxis()->SetRangeUser(1E-3,1);
@@ -136,9 +157,12 @@ void DrawGraph()
     gr_cd2_2->Draw("same pl");
 
     c->cd(3);
-    TPad *pad_cd3 = (TPad*)c->GetListOfPrimitives()->FindObject("c_3");
-    pad_cd3->SetLogx();
-    pad_cd3->SetLogy();
+    if(is_log_scale)
+    {
+        TPad *pad_cd3 = (TPad*)c->GetListOfPrimitives()->FindObject("c_3");
+        pad_cd3->SetLogx();
+        pad_cd3->SetLogy();
+    }
     TGraph *gr_cd3 = new TGraph(time_of_right_edge[0].size(), &time_of_right_edge[0][0], &overlapped_area[0]);
     gr_cd3->SetName("gr_cd3");
 //    gr_cd1->GetYaxis()->SetRangeUser(1E-3,1);
@@ -149,6 +173,23 @@ void DrawGraph()
     gr_cd3->SetMarkerSize(1);
     gr_cd3->SetMarkerColor(kGreen);
     gr_cd3->Draw();
+
+    c->cd(4);
+    if(is_log_scale)
+    {
+        TPad *pad_cd4 = (TPad*)c->GetListOfPrimitives()->FindObject("c_4");
+        pad_cd4->SetLogx();
+    }
+    TGraph *gr_cd4 = new TGraph(time_of_right_edge[2].size(), &N_ph[2][0], &sigma[2][0]);
+    gr_cd4->SetName("gr_cd4");
+//    gr_cd1->GetYaxis()->SetRangeUser(1E-3,1);
+    gr_cd4->SetTitle("A = 0.3, t_window = (-500, 20). 20 ns is optimum");
+    gr_cd4->GetXaxis()->SetTitle("N_ph");
+    gr_cd4->GetYaxis()->SetTitle("sigma");
+    gr_cd4->SetMarkerStyle(20);
+    gr_cd4->SetMarkerSize(1);
+    gr_cd4->SetMarkerColor(kGreen);
+    gr_cd4->Draw();
 
 
 }

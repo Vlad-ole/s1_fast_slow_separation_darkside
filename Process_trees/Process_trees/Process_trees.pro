@@ -25,6 +25,22 @@ SOURCES += \
     sigma_estimation.cpp \
     graph_sep_prob.cpp \
     read_slices.cpp \
-    graph_sigma_comparison.cpp
+    graph_sigma_comparison.cpp \
+    unfolding_example.cpp \
+    unfolding_wiener.cpp \
+    Graph_read/graph_real.cpp \
+    Graph_read/graph_sep_prob.cpp \
+    Graph_read/graph_sigma_comparison.cpp \
+    Graph_read/graph_simulation.cpp \
+    Graph_read/graph_tree.cpp \
+    test/test_parse.cpp \
+    test/test_vector.cpp \
+    Unfolding/unfolding.cpp \
+    Unfolding/unfolding_example.cpp \
+    Unfolding/unfolding_wiener.cpp \
+    Unfolding/wunfold.cpp \
+    fit_avr_am_signal_unfold.cpp \
+    combinecanvas.cpp \
+    getgraph.cpp
 
 HEADERS +=

@@ -1,12 +1,12 @@
 using namespace RooFit;
 
-const int n_photons = 50;
-const int n_events = 2000;
+const int n_photons = 500;
+const int n_events = 500;
 
 const double step = 4;//sampling rate in simulation
-const double t_w = 20;
-const double fraction = 0.3;
-const double sigma_response = 10;
+const double t_w = 150;
+const double fraction = 0.2308;
+const double sigma_response = 33;
 
 int counter(RooDataSet* data, double t_from, double t_to)
 {

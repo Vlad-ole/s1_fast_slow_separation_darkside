@@ -79,15 +79,27 @@ void fit_signal()
     double baseline_cd2 = Get_baseline(yv_cd2, (int)(time_baseline / time_scale));
     double baseline_cd3 = Get_baseline(yv_cd3, (int)(time_baseline / time_scale));
 
+    //just for comfortable view
+    for (int i = 0; i < size_cd1; ++i)
+    {
+        yv_cd1[i] = -(yv_cd1[i] - baseline_cd1);
+        yv_cd2[i] = -(yv_cd2[i] - baseline_cd2);
+        yv_cd3[i] = -(yv_cd3[i] - baseline_cd3);
+    }
+
+    baseline_cd1 = Get_baseline(yv_cd1, (int)(time_baseline / time_scale));
+    baseline_cd2 = Get_baseline(yv_cd2, (int)(time_baseline / time_scale));
+    baseline_cd3 = Get_baseline(yv_cd3, (int)(time_baseline / time_scale));
+
     TF1 *fitFcn_1 = new TF1("fitFcn_1", fit_exp, 0, 8000, 6);
     fitFcn_1->SetNpx(10000);
     fitFcn_1->SetLineColor(kBlue);  // sets the color to red
     fitFcn_1->SetParNames("baseline","time_0", "amp_1", "tau_1", "amp_2", "tau_2");
     fitFcn_1->FixParameter(0, baseline_cd1);//baseline
     fitFcn_1->SetParameter(1, 1996);//time_0
-    fitFcn_1->SetParameter(2, -1200);//amp_1
+    fitFcn_1->SetParameter(2, 1200);//amp_1
     fitFcn_1->SetParameter(3, 20);//tau_1
-    fitFcn_1->SetParameter(4, -200);//amp_2
+    fitFcn_1->SetParameter(4, 200);//amp_2
     fitFcn_1->SetParameter(5, 1000);//tau_2
 
     TF1 *fitFcn_2 = new TF1("fitFcn_2", fit_exp, 0, 8000, 6);
@@ -96,9 +108,9 @@ void fit_signal()
     fitFcn_2->SetParNames("baseline","time_0", "amp_1", "tau_1", "amp_2", "tau_2");
     fitFcn_2->FixParameter(0, baseline_cd2);//baseline
     fitFcn_2->SetParameter(1, 2085);//time_0
-    fitFcn_2->SetParameter(2, -300);//amp_1
+    fitFcn_2->SetParameter(2, 300);//amp_1
     fitFcn_2->SetParameter(3, 20);//tau_1
-    fitFcn_2->SetParameter(4, -100);//amp_2
+    fitFcn_2->SetParameter(4, 100);//amp_2
     fitFcn_2->SetParameter(5, 1000);//tau_2
 
     TF1 *fitFcn_3 = new TF1("fitFcn_3", fit_exp, 0, 8000, 6);
@@ -108,9 +120,9 @@ void fit_signal()
     fitFcn_3->FixParameter(0, baseline_cd3);//baseline
     fitFcn_3->SetParameter(1, 2100);//time_0
     fitFcn_3->SetParLimits(1, 2000, 2200);
-    fitFcn_3->SetParameter(2, -350);//amp_1
+    fitFcn_3->SetParameter(2, 350);//amp_1
     fitFcn_3->SetParameter(3, 20);//tau_1
-    fitFcn_3->SetParameter(4, -150);//amp_2
+    fitFcn_3->SetParameter(4, 150);//amp_2
     fitFcn_3->SetParameter(5, 1000);//tau_2
 
     TCanvas *canv_res = new TCanvas("c", "c", 0, 0, 1900, 1500);

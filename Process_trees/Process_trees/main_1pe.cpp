@@ -5,13 +5,13 @@ void ReadTree()
     gROOT->SetBatch(kTRUE); // it's really important to use this line if you save TCanvas in a tree!
 
     //read param
-    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
-    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_result.root";
-    const int run_id = 6061;
+//    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
+//    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_result.root";
+//    const int run_id = 6061;
 
-//    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees/";
-//    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_result.root";
-//    const int run_id = 6064;
+    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees/";
+    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_result.root";
+    const int run_id = 6064;
 
 
     //processing params
@@ -562,7 +562,13 @@ void ReadTree()
             if(i % 100 == 0) cout << "event = " << i << endl;
             if(true)
             {
-                Hlist_gr.Add( canv->Clone() );
+                TPad *pad_cd = (TPad*)canv->GetListOfPrimitives()->FindObject("c_3");
+                TGraph *gh_cd = (TGraph*)pad_cd->GetListOfPrimitives()->FindObject("Graph");
+                if (pad_cd == NULL)
+                    cout << "pad_cd == NULL" << endl;
+                if(gh_cd == NULL)
+                    cout << "gh_cd == NULL" << endl;
+                Hlist_gr.Add( gh_cd->Clone() );
             }
 
         }

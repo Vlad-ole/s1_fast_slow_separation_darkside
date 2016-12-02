@@ -2,8 +2,8 @@ void ReadTree_unfold()
 {
     //processing params
     const bool advanced_processing = false;
-    const bool normal_processing = false;
-    const bool simple_processing = true;
+    const bool normal_processing = true;
+    const bool simple_processing = false;
 
     string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees_unfold/";
     string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_result_unfold.root";
@@ -13,6 +13,7 @@ void ReadTree_unfold()
 //    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6053_bkg_result_unfold.root";
 //    const int run_id = 6053;
 
+    const double time_scale = 4;//ns
     const double spe_integral_ch2 = 1484.0;
 
     TObjArray Hlist_gr(0);
@@ -58,11 +59,11 @@ void ReadTree_unfold()
         gROOT->SetBatch(kFALSE);
 //        gROOT->SetBatch(kTRUE);
 
-//        TCut cut = "(integral_ch2_unfold_total / 1484.0) < 5 && (integral_ch2_unfold_fast / integral_ch2_unfold_total) < 0.1";
+        TCut cut = "(integral_ch2_unfold_total / 1484.0) > 10 && (integral_ch2_unfold_fast / integral_ch2_unfold_total) > 0.1 && (integral_ch2_unfold_fast / integral_ch2_unfold_total) < 0.6";
 
 
-        chain.Draw("integral_ch2_unfold_fast/integral_ch2_unfold_total>>hist(500, 0, 1)");
-//        chain.Draw("integral_ch2>>hist(500, -4000000, 8000000)");
+//        chain.Draw("integral_ch2_unfold_fast/integral_ch2_unfold_total>>hist(500, 0, 1)");
+        chain.Draw("(integral_ch2_unfold_total / 1484.0)>>hist(500, -500, 8000)", cut);
 //        chain.Draw("integral_ch2");
 
 
@@ -148,16 +149,36 @@ void ReadTree_unfold()
     {
         cout << "normal_processingg" << endl;
         gROOT->SetBatch(kTRUE);
-            const int n_entr = 1000;
+            const int n_entr = 10;
 //        const int n_entr = chain.GetEntries();
         for (int i = 0; i < n_entr; ++i)
         {
             chain.GetEntry(i);
             if(i % 100 == 0) cout << "event = " << i << endl;
 
-            if( (integral_ch2_unfold_total / 1484.0) < 5 && (integral_ch2_unfold_fast / integral_ch2_unfold_total) < 0.1  ) //start cut
+            const bool condition_pe = (integral_ch2_unfold_total / 1484.0) < 1000 ;
+            const bool condition_ratio = (integral_ch2_unfold_fast / integral_ch2_unfold_total) > 0.1;
+//            const bool condition_total = condition_pe && condition_ratio;
+            const bool condition_total = true;
+            if(condition_pe) //start cut
             {
-                Hlist_gr.Add( canv->Clone() );
+                stringstream ss;
+                ss << "c_" << i;
+                TCanvas *canv_result = new TCanvas(ss.str().c_str(), "c", 0, 0, 1900, 1500);
+
+                TPad *pad_cd = (TPad*)canv->GetListOfPrimitives()->FindObject("c_4");
+                TGraph *gh_cd = (TGraph*)pad_cd->GetListOfPrimitives()->FindObject("Graph");
+
+                TPad *pad_cd2 = (TPad*)canv->GetListOfPrimitives()->FindObject("c_7");
+                TGraph *gh_cd2 = (TGraph*)pad_cd2->GetListOfPrimitives()->FindObject("Graph");
+
+                if(gh_cd == NULL) cout << "gh_cd == NULL" << endl;
+
+                gh_cd->Draw("apl");
+                gh_cd2->Draw("same pl");
+
+                Hlist_gr.Add( canv_result->Clone() );
+//                delete canv_result;
             }//end cut
         }
 
@@ -167,6 +188,95 @@ void ReadTree_unfold()
         ofile_Hlist_gr.Close();
 
     }
+
+    if(advanced_processing)
+    {
+        bool is_first_time = true;
+//        const int n_entr = 1000;
+        const int n_entr = chain.GetEntries();
+
+        vector<double> xv;
+        vector<double> yv_cd7;
+        vector<double> yv_cd8;
+        vector<double> yv_cd9;
+        int size;
+
+        for (int i = 0; i < n_entr; ++i)
+        {
+            chain.GetEntry(i);
+            if(i % 100 == 0) cout << "event = " << i << endl;
+
+            TPad *pad_cd7 = (TPad*)canv->GetListOfPrimitives()->FindObject("c_7");
+            TGraph *gh_cd7 = (TGraph*)pad_cd7->GetListOfPrimitives()->FindObject("Graph");
+
+            TPad *pad_cd8 = (TPad*)canv->GetListOfPrimitives()->FindObject("c_8");
+            TGraph *gh_cd8 = (TGraph*)pad_cd8->GetListOfPrimitives()->FindObject("Graph");
+
+            TPad *pad_cd9 = (TPad*)canv->GetListOfPrimitives()->FindObject("c_9");
+            TGraph *gh_cd9 = (TGraph*)pad_cd9->GetListOfPrimitives()->FindObject("Graph");
+
+            if(gh_cd7 == NULL || gh_cd8 == NULL || gh_cd9 == NULL)
+                cout << "graph pnt in null" << endl;
+
+            if(is_first_time)
+            {
+                is_first_time = false;
+                size = gh_cd7->GetN();
+                xv.resize(size);
+                yv_cd7.resize(size);
+                yv_cd8.resize(size);
+                yv_cd9.resize(size);
+
+                for (int k = 0; k < size; ++k)
+                {
+                    xv[k] = k*time_scale;
+                }
+            }
+
+            for (int k = 0; k < size; ++k)
+            {
+                double x, y;
+                gh_cd7->GetPoint(k, x, y);
+                yv_cd7[k] += y;
+
+                gh_cd8->GetPoint(k, x, y);
+                yv_cd8[k] += y;
+
+                gh_cd9->GetPoint(k, x, y);
+                yv_cd9[k] += y;
+            }
+        }
+
+        for (int k = 0; k < size; ++k)
+        {
+             yv_cd7[k] /= n_entr;
+             yv_cd8[k] /= n_entr;
+             yv_cd9[k] /= n_entr;
+        }
+
+        TCanvas *canv_result = new TCanvas("c", "c", 0, 0, 1900, 1500);
+        canv_result->Divide(1, 3);
+
+        TGraph *graph_cd7 = new TGraph(xv.size(), &xv[0], &yv_cd7[0]);
+        TGraph *graph_cd8 = new TGraph(xv.size(), &xv[0], &yv_cd8[0]);
+        TGraph *graph_cd9 = new TGraph(xv.size(), &xv[0], &yv_cd9[0]);
+
+        canv_result->cd(1);
+        graph_cd7->Draw("apl");
+
+        canv_result->cd(2);
+        graph_cd8->Draw("apl");
+
+        canv_result->cd(3);
+        graph_cd9->Draw("apl");
+
+        cout << xv.size() << endl;
+        cout << yv_cd7.size() << endl;
+        cout << yv_cd8.size() << endl;
+        cout << yv_cd9.size() << endl;
+    }
+
+
 
     cout << endl << "Root cern script: all is ok" << endl;
 

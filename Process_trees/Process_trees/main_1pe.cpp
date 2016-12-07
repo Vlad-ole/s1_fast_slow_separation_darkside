@@ -4,14 +4,14 @@ void ReadTree()
 {
     gROOT->SetBatch(kTRUE); // it's really important to use this line if you save TCanvas in a tree!
 
-    //read param
-//    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
-//    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_result.root";
-//    const int run_id = 6061;
+//    //read param
+    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
+    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_result.root";
+    const int run_id = 6061;
 
-    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees/";
-    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_result.root";
-    const int run_id = 6064;
+//    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees/";
+//    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_result.root";
+//    const int run_id = 6064;
 
 
     //processing params
@@ -44,6 +44,11 @@ void ReadTree()
     double integral_ch0, integral_ch1, integral_ch2;
     double baseline_ch0, baseline_ch1, baseline_ch2;
     double max_abs_amp_ch0 ,max_abs_amp_ch1, max_abs_amp_ch2;
+    double min_amp_ch0, min_amp_ch1, min_amp_ch2;
+
+    double min_amp_ch0_0_2045, min_amp_ch0_2100_5000;
+    double min_amp_ch1_0_2000, min_amp_ch1_2800_5000;
+    double min_amp_ch2_0_1900, min_amp_ch2_2800_5000;
 
     chain.SetBranchAddress("integral_ch0", &integral_ch0);
     chain.SetBranchAddress("integral_ch1", &integral_ch1);
@@ -56,6 +61,18 @@ void ReadTree()
     chain.SetBranchAddress("max_abs_amp_ch0", &max_abs_amp_ch0);
     chain.SetBranchAddress("max_abs_amp_ch1", &max_abs_amp_ch1);
     chain.SetBranchAddress("max_abs_amp_ch2", &max_abs_amp_ch2);
+
+    chain.SetBranchAddress("min_amp_ch0", &min_amp_ch0);
+    chain.SetBranchAddress("min_amp_ch1", &min_amp_ch1);
+    chain.SetBranchAddress("min_amp_ch2", &min_amp_ch2);
+
+    chain.SetBranchAddress("min_amp_ch0_0_2045", &min_amp_ch0_0_2045);
+    chain.SetBranchAddress("min_amp_ch0_2100_5000", &min_amp_ch0_2100_5000);
+
+    chain.SetBranchAddress("min_amp_ch1_0_2000", &min_amp_ch1_0_2000);
+    chain.SetBranchAddress("min_amp_ch1_2800_5000", &min_amp_ch1_2800_5000);
+    chain.SetBranchAddress("min_amp_ch2_0_1900", &min_amp_ch2_0_1900);
+    chain.SetBranchAddress("min_amp_ch2_2800_5000", &min_amp_ch2_2800_5000);
 
 
     //TCut total_cut = "integral_ch2 > -50000 && integral_ch2 < 50000";
@@ -556,19 +573,33 @@ void ReadTree()
     if(normal_processing)
     {
         const int n_entr = chain.GetEntries();
-        for (int i = 0; i < 100; ++i)
+        for (int i = 0; i < n_entr; ++i)
         {
             chain.GetEntry(i);
             if(i % 100 == 0) cout << "event = " << i << endl;
-            if(true)
+//            cout << "min_amp_ch2 = " << min_amp_ch2  << endl;
+
+            //ch0
+            const bool cut1 = (min_amp_ch0 > 3800);
+            const bool cut2 = (min_amp_ch0_0_2045 > 4031) && (min_amp_ch0_2100_5000 > 4031);
+
+            //ch1
+//            const bool cut1 = (min_amp_ch1 > 3350);
+//            const bool cut2 =  (min_amp_ch1_0_2000 > 3410) && (min_amp_ch1_2800_5000 > 3410);
+
+            //ch2
+//            const bool cut1 = (min_amp_ch2 > 3250);
+//            const bool cut2 =  (min_amp_ch2_0_1900 > 3412) && (min_amp_ch2_2800_5000 > 3412);
+
+            if(cut1 && cut2)
             {
-                TPad *pad_cd = (TPad*)canv->GetListOfPrimitives()->FindObject("c_3");
-                TGraph *gh_cd = (TGraph*)pad_cd->GetListOfPrimitives()->FindObject("Graph");
-                if (pad_cd == NULL)
-                    cout << "pad_cd == NULL" << endl;
-                if(gh_cd == NULL)
-                    cout << "gh_cd == NULL" << endl;
-                Hlist_gr.Add( gh_cd->Clone() );
+//                TPad *pad_cd = (TPad*)canv->GetListOfPrimitives()->FindObject("c_3");
+//                TGraph *gh_cd = (TGraph*)pad_cd->GetListOfPrimitives()->FindObject("Graph");
+//                if (pad_cd == NULL)
+//                    cout << "pad_cd == NULL" << endl;
+//                if(gh_cd == NULL)
+//                    cout << "gh_cd == NULL" << endl;
+                Hlist_gr.Add( canv->Clone() );
             }
 
         }

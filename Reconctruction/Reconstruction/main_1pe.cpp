@@ -32,7 +32,7 @@
 using namespace std;
 
 
-int main_1pe(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     struct timespec timespec_str_before, timespec_str_after, timespec_str_total_before, timespec_str_total_after;
     double t_read_file = 0;
@@ -57,10 +57,10 @@ int main_1pe(int argc, char *argv[])
     const double time_integral_to = 1950 + 700; // ns
     const double time_avr_baseline_to = 1600; // ns
     const int events_per_file = 1000;
-    const int max_files = 100;
+    const int max_files = 1000;
     //fft
     const double time_fft_noise_ch0_from = 0;//ns
-    const double time_fft_noise_ch0_to = 2000;//ns
+    const double time_fft_noise_ch0_to = 1600;//ns
     const double time_fft_signal_ch0_from = time_integral_ch0_from;
     const double time_fft_signal_ch0_to = time_integral_ch0_to;
 
@@ -79,24 +79,27 @@ int main_1pe(int argc, char *argv[])
 //    const int run_id = 6064;
 //    const int time_scale = 4;//ns
 //    const int n_points_savitzky_golay = 21; // points
-//    const double time_integral_ch0_from = 1900; // ns
+//    const double time_integral_ch0_from = 1900; // ns (was 1900)
 //    const double time_integral_ch0_to = 14900;// ns
-//    const double time_integral_from = 1900; // ns
+//    const double time_integral_from = 1900; // ns (was 1900)
 //    const double time_integral_to = 14900; // ns
 //    const double time_avr_baseline_to = 1600; // ns
 //    const int events_per_file = 1000;
-//    const int max_files = 100000;
+//    const int max_files = 1000;
 
 //    //fft
 //    const double time_fft_noise_ch0_from = 0;//ns
 //    const double time_fft_noise_ch0_to = 1600;//ns
-//    const double time_fft_signal_ch0_from = time_integral_ch0_from;
+//    const double time_fft_signal_ch0_from = 0; //(was time_integral_ch0_from)
 //    const double time_fft_signal_ch0_to = time_integral_ch0_to;
 
 //    const double time_fft_noise_from = 0;//ns
 //    const double time_fft_noise_to = time_avr_baseline_to;//ns
-//    const double time_fft_signal_from = time_integral_from;
+//    const double time_fft_signal_from = 0; //(was time_integral_from)
 //    const double time_fft_signal_to = time_integral_to;
+
+//    double time_fft_total_from;
+//    double time_fft_total_to;
 
     //
     vector<double> xv_double;
@@ -161,6 +164,11 @@ int main_1pe(int argc, char *argv[])
         double integral_ch0, integral_ch1, integral_ch2;
         double baseline_ch0, baseline_ch1, baseline_ch2;
         double max_abs_amp_ch0, max_abs_amp_ch1, max_abs_amp_ch2;
+        double min_amp_ch0, min_amp_ch1, min_amp_ch2;
+
+        double min_amp_ch0_0_2045, min_amp_ch0_2100_5000;
+        double min_amp_ch1_0_2000, min_amp_ch1_2800_5000;
+        double min_amp_ch2_0_1900, min_amp_ch2_2800_5000;
 
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
@@ -182,6 +190,22 @@ int main_1pe(int argc, char *argv[])
         max_abs_amp_ch0 = abs( *min_element(data[0].begin(), data[0].end()) - baseline_ch0 );
         max_abs_amp_ch1 = abs( *min_element(data[1].begin(), data[1].end()) - baseline_ch1 );
         max_abs_amp_ch2 = abs( *min_element(data[2].begin(), data[2].end()) - baseline_ch2 );
+
+        min_amp_ch0 = *min_element(data[0].begin(), data[0].end());
+        min_amp_ch1 = *min_element(data[1].begin(), data[1].end());
+        min_amp_ch2 = *min_element(data[2].begin(), data[2].end());
+
+
+        min_amp_ch0_0_2045 = *min_element(data[0].begin(), data[0].begin() + 2045/time_scale );
+        min_amp_ch0_2100_5000 = *min_element(data[0].begin() + 2100/time_scale, data[0].end() );
+
+        min_amp_ch1_0_2000 = *min_element(data[1].begin(), data[1].begin() + 2000/time_scale );
+        min_amp_ch1_2800_5000 = *min_element(data[1].begin() + 2800/time_scale, data[1].end() );
+
+        min_amp_ch2_0_1900 = *min_element(data[2].begin(), data[2].begin() + 1900/time_scale );
+        min_amp_ch2_2800_5000 = *min_element(data[2].begin() + 2800/time_scale, data[2].end() );
+
+
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_calculate_abs_amp += get_time_delta(timespec_str_before, timespec_str_after);
 
@@ -215,25 +239,25 @@ int main_1pe(int argc, char *argv[])
         //calculate fft. Output in MHz
 //        vector< vector<double> > ch1_fft_amp_spectum_noise = Get_fft_amp_spectrum(test_data_y, time_fft_noise_from, time_fft_noise_to, 1.0/sampling_frequency);
 
-        vector< vector<double> > ch0_fft_amp_spectum_total = Get_fft_amp_spectrum(data_minus_baseline[0], time_fft_total_from, time_fft_total_to, time_scale);
-        //        vector< vector<double> > ch0_fft_amp_spectum_noise = Get_fft_amp_spectrum(data_minus_baseline[0], time_fft_noise_ch0_from, time_fft_noise_ch0_to, time_scale);
-//        vector< vector<double> > ch0_fft_amp_spectum_signal = Get_fft_amp_spectrum(data_minus_baseline[0], time_fft_signal_ch0_from, time_fft_signal_ch0_to, time_scale);
+//        vector< vector<double> > ch0_fft_amp_spectum_total = Get_fft_amp_spectrum(data_minus_baseline[0], time_fft_total_from, time_fft_total_to, time_scale);
+        vector< vector<double> > ch0_fft_amp_spectum_noise = Get_fft_amp_spectrum(data_minus_baseline[0], time_fft_noise_ch0_from, time_fft_noise_ch0_to, time_scale);
+        vector< vector<double> > ch0_fft_amp_spectum_signal = Get_fft_amp_spectrum(data_minus_baseline[0], time_fft_signal_ch0_from, time_fft_signal_ch0_to, time_scale);
 
-        vector< vector<double> > ch1_fft_amp_spectum_total = Get_fft_amp_spectrum(data_minus_baseline[1], time_fft_total_from, time_fft_total_to, time_scale);
-        //        vector< vector<double> > ch1_fft_amp_spectum_noise = Get_fft_amp_spectrum(data_minus_baseline[1], time_fft_noise_from, time_fft_noise_to, time_scale);
-//        vector< vector<double> > ch1_fft_amp_spectum_signal = Get_fft_amp_spectrum(data_minus_baseline[1], time_fft_signal_from, time_fft_signal_to, time_scale);
+//        vector< vector<double> > ch1_fft_amp_spectum_total = Get_fft_amp_spectrum(data_minus_baseline[1], time_fft_total_from, time_fft_total_to, time_scale);
+        vector< vector<double> > ch1_fft_amp_spectum_noise = Get_fft_amp_spectrum(data_minus_baseline[1], time_fft_noise_from, time_fft_noise_to, time_scale);
+        vector< vector<double> > ch1_fft_amp_spectum_signal = Get_fft_amp_spectrum(data_minus_baseline[1], time_fft_signal_from, time_fft_signal_to, time_scale);
 
-        vector< vector<double> > ch2_fft_amp_spectum_total = Get_fft_amp_spectrum(data_minus_baseline[2], time_fft_total_from, time_fft_total_to, time_scale);
-        //        vector< vector<double> > ch2_fft_amp_spectum_noise = Get_fft_amp_spectrum(data_minus_baseline[2], time_fft_noise_from, time_fft_noise_to, time_scale);
-//        vector< vector<double> > ch2_fft_amp_spectum_signal = Get_fft_amp_spectrum(data_minus_baseline[2], time_fft_signal_from, time_fft_signal_to, time_scale);
+//        vector< vector<double> > ch2_fft_amp_spectum_total = Get_fft_amp_spectrum(data_minus_baseline[2], time_fft_total_from, time_fft_total_to, time_scale);
+        vector< vector<double> > ch2_fft_amp_spectum_noise = Get_fft_amp_spectrum(data_minus_baseline[2], time_fft_noise_from, time_fft_noise_to, time_scale);
+        vector< vector<double> > ch2_fft_amp_spectum_signal = Get_fft_amp_spectrum(data_minus_baseline[2], time_fft_signal_from, time_fft_signal_to, time_scale);
 
-        vector< vector<double> > ch0_fft_amp_spectum_total_cut = vector_vector_cut_x_value(ch0_fft_amp_spectum_total, cut_frequency);
-        vector< vector<double> > ch1_fft_amp_spectum_total_cut = vector_vector_cut_x_value(ch1_fft_amp_spectum_total, cut_frequency);
-        vector< vector<double> > ch2_fft_amp_spectum_total_cut = vector_vector_cut_x_value(ch2_fft_amp_spectum_total, cut_frequency);
+//        vector< vector<double> > ch0_fft_amp_spectum_total_cut = vector_vector_cut_x_value(ch0_fft_amp_spectum_total, cut_frequency);
+//        vector< vector<double> > ch1_fft_amp_spectum_total_cut = vector_vector_cut_x_value(ch1_fft_amp_spectum_total, cut_frequency);
+//        vector< vector<double> > ch2_fft_amp_spectum_total_cut = vector_vector_cut_x_value(ch2_fft_amp_spectum_total, cut_frequency);
 
-        vector< vector<double> > ch0_ifft = Get_ifft(ch0_fft_amp_spectum_total_cut, nsamps, time_scale);
-        vector< vector<double> > ch1_ifft = Get_ifft(ch1_fft_amp_spectum_total_cut, nsamps, time_scale);
-        vector< vector<double> > ch2_ifft = Get_ifft(ch2_fft_amp_spectum_total_cut, nsamps, time_scale);
+//        vector< vector<double> > ch0_ifft = Get_ifft(ch0_fft_amp_spectum_total_cut, nsamps, time_scale);
+//        vector< vector<double> > ch1_ifft = Get_ifft(ch1_fft_amp_spectum_total_cut, nsamps, time_scale);
+//        vector< vector<double> > ch2_ifft = Get_ifft(ch2_fft_amp_spectum_total_cut, nsamps, time_scale);
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
         t_fft += get_time_delta(timespec_str_before, timespec_str_after);
@@ -243,7 +267,7 @@ int main_1pe(int argc, char *argv[])
         TCanvas canv("c", "c", 0, 0, 1900, 1500);
 //        canv.SetCanvasSize(1900, 2000);
         //canv.SetWindowSize(100, 100);
-        canv.Divide(3, 3);
+        canv.Divide(3, 4);
 
 
         //cd1
@@ -251,15 +275,15 @@ int main_1pe(int argc, char *argv[])
         graph_cd1.SetTitle("original - baseline (Channel 0, PMT)");
         graph_cd1.GetXaxis()->SetTitle("time [ns]");
         graph_cd1.GetYaxis()->SetTitle("amplitude[channels]");
-        TGraph graph_cd1_2(nsamps, &ch0_ifft[0][0], &ch0_ifft[1][0]);
+//        TGraph graph_cd1_2(nsamps, &ch0_ifft[0][0], &ch0_ifft[1][0]);
         canv.cd(1);
         graph_cd1.Draw("apl");
-        graph_cd1_2.Draw("same pl");
-        graph_cd1_2.SetLineStyle(2);
-        graph_cd1_2.SetLineColor(kBlue);
-        graph_cd1_2.SetMarkerStyle(20);
-        graph_cd1_2.SetMarkerSize(1);
-        graph_cd1_2.SetMarkerColor(kBlue);
+//        graph_cd1_2.Draw("same pl");
+//        graph_cd1_2.SetLineStyle(2);
+//        graph_cd1_2.SetLineColor(kBlue);
+//        graph_cd1_2.SetMarkerStyle(20);
+//        graph_cd1_2.SetMarkerSize(1);
+//        graph_cd1_2.SetMarkerColor(kBlue);
 
         TF1 tf1_baseline_cd1("tf1_baseline_cd1","[0]",0,time_scale*nsamps);
         tf1_baseline_cd1.SetParameter(0,0);
@@ -277,17 +301,17 @@ int main_1pe(int argc, char *argv[])
         graph_cd2.SetTitle("original - baseline (Channel 1, SiPM)");
         graph_cd2.GetXaxis()->SetTitle("time [ns]");
         graph_cd2.GetYaxis()->SetTitle("amplitude[channels]");
-        TGraph graph_cd2_2(nsamps, &ch1_ifft[0][0], &ch1_ifft[1][0]);
-        graph_cd2_2.SetLineStyle(2);
-        graph_cd2_2.SetLineColor(kBlue);
+//        TGraph graph_cd2_2(nsamps, &ch1_ifft[0][0], &ch1_ifft[1][0]);
+//        graph_cd2_2.SetLineStyle(2);
+//        graph_cd2_2.SetLineColor(kBlue);
         canv.cd(2);
         graph_cd2.Draw("apl");
-        graph_cd2_2.Draw("same pl");
-        graph_cd2_2.SetLineStyle(2);
-        graph_cd2_2.SetLineColor(kBlue);
-        graph_cd2_2.SetMarkerStyle(20);
-        graph_cd2_2.SetMarkerSize(1);
-        graph_cd2_2.SetMarkerColor(kBlue);
+//        graph_cd2_2.Draw("same pl");
+//        graph_cd2_2.SetLineStyle(2);
+//        graph_cd2_2.SetLineColor(kBlue);
+//        graph_cd2_2.SetMarkerStyle(20);
+//        graph_cd2_2.SetMarkerSize(1);
+//        graph_cd2_2.SetMarkerColor(kBlue);
 
 
         TF1 tf1_baseline_cd2("tf1_baseline_cd2","[0]",0,time_scale*nsamps);
@@ -306,17 +330,21 @@ int main_1pe(int argc, char *argv[])
         graph_cd3.SetTitle("original - baseline (Channel 2, SiPM)");
         graph_cd3.GetXaxis()->SetTitle("time [ns]");
         graph_cd3.GetYaxis()->SetTitle("amplitude[channels]");
-        TGraph graph_cd3_2(nsamps, &ch2_ifft[0][0], &ch2_ifft[1][0]);
-        graph_cd3_2.SetLineStyle(2);
-        graph_cd3_2.SetLineColor(kBlue);
+
+//        TGraph graph_cd3_2(nsamps, &ch2_ifft[0][0], &ch2_ifft[1][0]);
+//        graph_cd3_2.SetLineStyle(2);
+//        graph_cd3_2.SetLineColor(kBlue);
+//        graph_cd3_2.SetLineStyle(2);
+//        graph_cd3_2.SetLineColor(kBlue);
+//        graph_cd3_2.SetMarkerStyle(20);
+//        graph_cd3_2.SetMarkerSize(1);
+//        graph_cd3_2.SetMarkerColor(kBlue);
+
         canv.cd(3);
         graph_cd3.Draw("apl");
-        graph_cd3_2.Draw("same pl");
-        graph_cd3_2.SetLineStyle(2);
-        graph_cd3_2.SetLineColor(kBlue);
-        graph_cd3_2.SetMarkerStyle(20);
-        graph_cd3_2.SetMarkerSize(1);
-        graph_cd3_2.SetMarkerColor(kBlue);
+//        graph_cd3_2.Draw("same pl");
+
+
 
         TF1 tf1_baseline_cd3("tf1_baseline_cd3","[0]",0,time_scale*nsamps);
         tf1_baseline_cd3.SetParameter(0,0);
@@ -330,82 +358,34 @@ int main_1pe(int argc, char *argv[])
         pt_cd3.Draw();
 
 
-        //cd4
-        TGraph graph_cd4(nsamps, &xv_double[0], &ch0_der[0]);
-        graph_cd4.SetTitle("derivative (Channel 0, PMT)");
-        graph_cd4.GetXaxis()->SetTitle("time [ns]");
-        graph_cd4.GetYaxis()->SetTitle("derivative [channels / ns]");
-        canv.cd(4);
-        graph_cd4.Draw();
+//        //cd4
+//        TGraph graph_cd4(nsamps, &xv_double[0], &ch0_der[0]);
+//        graph_cd4.SetTitle("derivative (Channel 0, PMT)");
+//        graph_cd4.GetXaxis()->SetTitle("time [ns]");
+//        graph_cd4.GetYaxis()->SetTitle("derivative [channels / ns]");
+//        canv.cd(4);
+//        graph_cd4.Draw();
 
-        //cd5
-        TGraph graph_cd5(nsamps, &xv_double[0], &ch1_der[0]);
-        graph_cd5.SetTitle("derivative (Channel 1, SiPM)");
-        graph_cd5.GetXaxis()->SetTitle("time [ns]");
-        graph_cd5.GetYaxis()->SetTitle("derivative [channels / ns]");
-        canv.cd(5);
-        graph_cd5.Draw();
+//        //cd5
+//        TGraph graph_cd5(nsamps, &xv_double[0], &ch1_der[0]);
+//        graph_cd5.SetTitle("derivative (Channel 1, SiPM)");
+//        graph_cd5.GetXaxis()->SetTitle("time [ns]");
+//        graph_cd5.GetYaxis()->SetTitle("derivative [channels / ns]");
+//        canv.cd(5);
+//        graph_cd5.Draw();
 
-        //cd6
-        TGraph graph_cd6(nsamps, &xv_double[0], &ch2_der[0]);
-        graph_cd6.SetTitle("derivative (Channel 2, SiPM)");
-        graph_cd6.GetXaxis()->SetTitle("time [ns]");
-        graph_cd6.GetYaxis()->SetTitle("derivative [channels / ns]");
-        canv.cd(6);
-        graph_cd6.Draw();
-
-        //cd7
-        TGraph graph_cd7(ch0_fft_amp_spectum_total[0].size(), &ch0_fft_amp_spectum_total[0][0], &ch0_fft_amp_spectum_total[1][0]);
-        TGraph graph_cd7_2(ch0_fft_amp_spectum_total_cut[0].size(), &ch0_fft_amp_spectum_total_cut[0][0], &ch0_fft_amp_spectum_total_cut[1][0]);
-        graph_cd7.SetTitle("Amplitude spectrum of total signal (Channel 0, PMT)");
-        graph_cd7.GetXaxis()->SetTitle("frequensy [MHz]");
-        graph_cd7.GetYaxis()->SetTitle("amplitude [a.u.]");
-        canv.cd(7);
-        graph_cd7.Draw("AP");
-        graph_cd7.SetMarkerStyle(20);
-        graph_cd7.SetMarkerSize(0.5);
-        graph_cd7.SetMarkerColor(kRed);
-        graph_cd7_2.SetMarkerStyle(20);
-        graph_cd7_2.SetMarkerSize(0.2);
-        graph_cd7_2.SetMarkerColor(kBlue);
-        graph_cd7_2.Draw("same");
-
-        //cd8
-        TGraph graph_cd8(ch1_fft_amp_spectum_total[0].size(), &ch1_fft_amp_spectum_total[0][0], &ch1_fft_amp_spectum_total[1][0]);
-        TGraph graph_cd8_2(ch1_fft_amp_spectum_total_cut[0].size(), &ch1_fft_amp_spectum_total_cut[0][0], &ch1_fft_amp_spectum_total_cut[1][0]);
-        graph_cd8.SetTitle("Amplitude spectrum of total signal (Channel 1, SiPM)");
-        graph_cd8.GetXaxis()->SetTitle("frequensy [MHz]");
-        graph_cd8.GetYaxis()->SetTitle("amplitude [a.u.]");
-        canv.cd(8);
-        graph_cd8.Draw("AP");
-        graph_cd8.SetMarkerStyle(20);
-        graph_cd8.SetMarkerSize(0.5);
-        graph_cd8.SetMarkerColor(kRed);
-        graph_cd8_2.SetMarkerStyle(20);
-        graph_cd8_2.SetMarkerSize(0.2);
-        graph_cd8_2.SetMarkerColor(kBlue);
-        graph_cd8_2.Draw("same");
-
-        //cd9
-        TGraph graph_cd9(ch2_fft_amp_spectum_total[0].size(), &ch2_fft_amp_spectum_total[0][0], &ch2_fft_amp_spectum_total[1][0]);
-        TGraph graph_cd9_2(ch2_fft_amp_spectum_total_cut[0].size(), &ch2_fft_amp_spectum_total_cut[0][0], &ch2_fft_amp_spectum_total_cut[1][0]);
-        graph_cd9.SetTitle("Amplitude spectrum of total signal (Channel 2, SiPM)");
-        graph_cd9.GetXaxis()->SetTitle("frequensy [MHz]");
-        graph_cd9.GetYaxis()->SetTitle("amplitude [a.u.]");
-        canv.cd(9);
-        graph_cd9.Draw("AP");
-        graph_cd9.SetMarkerStyle(20);
-        graph_cd9.SetMarkerSize(0.5);
-        graph_cd9.SetMarkerColor(kRed);
-        graph_cd9_2.SetMarkerStyle(20);
-        graph_cd9_2.SetMarkerSize(0.2);
-        graph_cd9_2.SetMarkerColor(kBlue);
-        graph_cd9_2.Draw("same");
-
+//        //cd6
+//        TGraph graph_cd6(nsamps, &xv_double[0], &ch2_der[0]);
+//        graph_cd6.SetTitle("derivative (Channel 2, SiPM)");
+//        graph_cd6.GetXaxis()->SetTitle("time [ns]");
+//        graph_cd6.GetYaxis()->SetTitle("derivative [channels / ns]");
+//        canv.cd(6);
+//        graph_cd6.Draw();
 
 //        //cd7
-//        TGraph graph_cd7(ch0_fft_amp_spectum_noise[0].size(), &ch0_fft_amp_spectum_noise[0][0], &ch0_fft_amp_spectum_noise[1][0]);
-//        graph_cd7.SetTitle("Amplitude spectrum of noise signal (Channel 0, PMT)");
+//        TGraph graph_cd7(ch0_fft_amp_spectum_total[0].size(), &ch0_fft_amp_spectum_total[0][0], &ch0_fft_amp_spectum_total[1][0]);
+//        TGraph graph_cd7_2(ch0_fft_amp_spectum_total_cut[0].size(), &ch0_fft_amp_spectum_total_cut[0][0], &ch0_fft_amp_spectum_total_cut[1][0]);
+//        graph_cd7.SetTitle("Amplitude spectrum of total signal (Channel 0, PMT)");
 //        graph_cd7.GetXaxis()->SetTitle("frequensy [MHz]");
 //        graph_cd7.GetYaxis()->SetTitle("amplitude [a.u.]");
 //        canv.cd(7);
@@ -413,11 +393,15 @@ int main_1pe(int argc, char *argv[])
 //        graph_cd7.SetMarkerStyle(20);
 //        graph_cd7.SetMarkerSize(0.5);
 //        graph_cd7.SetMarkerColor(kRed);
-
+//        graph_cd7_2.SetMarkerStyle(20);
+//        graph_cd7_2.SetMarkerSize(0.2);
+//        graph_cd7_2.SetMarkerColor(kBlue);
+//        graph_cd7_2.Draw("same");
 
 //        //cd8
-//        TGraph graph_cd8(ch1_fft_amp_spectum_noise[0].size(), &ch1_fft_amp_spectum_noise[0][0], &ch1_fft_amp_spectum_noise[1][0]);
-//        graph_cd8.SetTitle("Amplitude spectrum of noise signal (Channel 1, SiPM)");
+//        TGraph graph_cd8(ch1_fft_amp_spectum_total[0].size(), &ch1_fft_amp_spectum_total[0][0], &ch1_fft_amp_spectum_total[1][0]);
+//        TGraph graph_cd8_2(ch1_fft_amp_spectum_total_cut[0].size(), &ch1_fft_amp_spectum_total_cut[0][0], &ch1_fft_amp_spectum_total_cut[1][0]);
+//        graph_cd8.SetTitle("Amplitude spectrum of total signal (Channel 1, SiPM)");
 //        graph_cd8.GetXaxis()->SetTitle("frequensy [MHz]");
 //        graph_cd8.GetYaxis()->SetTitle("amplitude [a.u.]");
 //        canv.cd(8);
@@ -425,10 +409,15 @@ int main_1pe(int argc, char *argv[])
 //        graph_cd8.SetMarkerStyle(20);
 //        graph_cd8.SetMarkerSize(0.5);
 //        graph_cd8.SetMarkerColor(kRed);
+//        graph_cd8_2.SetMarkerStyle(20);
+//        graph_cd8_2.SetMarkerSize(0.2);
+//        graph_cd8_2.SetMarkerColor(kBlue);
+//        graph_cd8_2.Draw("same");
 
 //        //cd9
-//        TGraph graph_cd9(ch2_fft_amp_spectum_noise[0].size(), &ch2_fft_amp_spectum_noise[0][0], &ch2_fft_amp_spectum_noise[1][0]);
-//        graph_cd9.SetTitle("Amplitude spectrum of noise signal (Channel 2, SiPM)");
+//        TGraph graph_cd9(ch2_fft_amp_spectum_total[0].size(), &ch2_fft_amp_spectum_total[0][0], &ch2_fft_amp_spectum_total[1][0]);
+//        TGraph graph_cd9_2(ch2_fft_amp_spectum_total_cut[0].size(), &ch2_fft_amp_spectum_total_cut[0][0], &ch2_fft_amp_spectum_total_cut[1][0]);
+//        graph_cd9.SetTitle("Amplitude spectrum of total signal (Channel 2, SiPM)");
 //        graph_cd9.GetXaxis()->SetTitle("frequensy [MHz]");
 //        graph_cd9.GetYaxis()->SetTitle("amplitude [a.u.]");
 //        canv.cd(9);
@@ -436,39 +425,102 @@ int main_1pe(int argc, char *argv[])
 //        graph_cd9.SetMarkerStyle(20);
 //        graph_cd9.SetMarkerSize(0.5);
 //        graph_cd9.SetMarkerColor(kRed);
+//        graph_cd9_2.SetMarkerStyle(20);
+//        graph_cd9_2.SetMarkerSize(0.2);
+//        graph_cd9_2.SetMarkerColor(kBlue);
+//        graph_cd9_2.Draw("same");
 
-//        //cd10
-//        TGraph graph_cd10(ch0_fft_amp_spectum_signal[0].size(), &ch0_fft_amp_spectum_signal[0][0], &ch0_fft_amp_spectum_signal[1][0]);
-//        graph_cd10.SetTitle("Amplitude spectrum of signal (Channel 0, PMT)");
-//        graph_cd10.GetXaxis()->SetTitle("frequensy [MHz]");
-//        graph_cd10.GetYaxis()->SetTitle("amplitude [a.u.]");
-//        canv.cd(10);
-//        graph_cd10.Draw("AP");
-//        graph_cd10.SetMarkerStyle(20);
-//        graph_cd10.SetMarkerSize(0.5);
-//        graph_cd10.SetMarkerColor(kRed);
+
+//        //cd7
+        TGraph graph_cd7(ch0_fft_amp_spectum_noise[0].size(), &ch0_fft_amp_spectum_noise[0][0], &ch0_fft_amp_spectum_noise[1][0]);
+        graph_cd7.SetTitle("Amplitude spectrum of noise signal (Channel 0, PMT)");
+        graph_cd7.GetXaxis()->SetTitle("frequensy [MHz]");
+        graph_cd7.GetYaxis()->SetTitle("amplitude [a.u.]");
+        canv.cd(4);
+        graph_cd7.Draw("AP");
+        graph_cd7.SetMarkerStyle(20);
+        graph_cd7.SetMarkerSize(0.5);
+        graph_cd7.SetMarkerColor(kRed);
+
+
+//        //cd8
+        TGraph graph_cd8(ch1_fft_amp_spectum_noise[0].size(), &ch1_fft_amp_spectum_noise[0][0], &ch1_fft_amp_spectum_noise[1][0]);
+        graph_cd8.SetTitle("Amplitude spectrum of noise signal (Channel 1, SiPM)");
+        graph_cd8.GetXaxis()->SetTitle("frequensy [MHz]");
+        graph_cd8.GetYaxis()->SetTitle("amplitude [a.u.]");
+        canv.cd(5);
+        graph_cd8.Draw("AP");
+        graph_cd8.SetMarkerStyle(20);
+        graph_cd8.SetMarkerSize(0.5);
+        graph_cd8.SetMarkerColor(kRed);
+
+//        //cd9
+        TGraph graph_cd9(ch2_fft_amp_spectum_noise[0].size(), &ch2_fft_amp_spectum_noise[0][0], &ch2_fft_amp_spectum_noise[1][0]);
+        graph_cd9.SetTitle("Amplitude spectrum of noise signal (Channel 2, SiPM)");
+        graph_cd9.GetXaxis()->SetTitle("frequensy [MHz]");
+        graph_cd9.GetYaxis()->SetTitle("amplitude [a.u.]");
+        canv.cd(6);
+        graph_cd9.Draw("AP");
+        graph_cd9.SetMarkerStyle(20);
+        graph_cd9.SetMarkerSize(0.5);
+        graph_cd9.SetMarkerColor(kRed);
+
+        //cd10
+        TGraph graph_cd10(ch0_fft_amp_spectum_signal[0].size(), &ch0_fft_amp_spectum_signal[0][0], &ch0_fft_amp_spectum_signal[1][0]);
+        graph_cd10.SetTitle("Amplitude spectrum of signal (Channel 0, PMT)");
+        graph_cd10.GetXaxis()->SetTitle("frequensy [MHz]");
+        graph_cd10.GetYaxis()->SetTitle("amplitude [a.u.]");
+        canv.cd(7);
+        graph_cd10.Draw("AP");
+        graph_cd10.SetMarkerStyle(20);
+        graph_cd10.SetMarkerSize(0.5);
+        graph_cd10.SetMarkerColor(kRed);
 
 //        //cd11
-//        TGraph graph_cd11(ch1_fft_amp_spectum_signal[0].size(), &ch1_fft_amp_spectum_signal[0][0], &ch1_fft_amp_spectum_signal[1][0]);
-//        graph_cd11.SetTitle("Amplitude spectrum of signal (Channel 1, SiPM)");
-//        graph_cd11.GetXaxis()->SetTitle("frequensy [MHz]");
-//        graph_cd11.GetYaxis()->SetTitle("amplitude [a.u.]");
-//        canv.cd(11);
-//        graph_cd11.Draw("AP");
-//        graph_cd11.SetMarkerStyle(20);
-//        graph_cd11.SetMarkerSize(0.5);
-//        graph_cd11.SetMarkerColor(kRed);
+        TGraph graph_cd11(ch1_fft_amp_spectum_signal[0].size(), &ch1_fft_amp_spectum_signal[0][0], &ch1_fft_amp_spectum_signal[1][0]);
+        graph_cd11.SetTitle("Amplitude spectrum of signal (Channel 1, SiPM)");
+        graph_cd11.GetXaxis()->SetTitle("frequensy [MHz]");
+        graph_cd11.GetYaxis()->SetTitle("amplitude [a.u.]");
+        canv.cd(8);
+        graph_cd11.Draw("AP");
+        graph_cd11.SetMarkerStyle(20);
+        graph_cd11.SetMarkerSize(0.5);
+        graph_cd11.SetMarkerColor(kRed);
 
 //        //cd12
-//        TGraph graph_cd12(ch2_fft_amp_spectum_signal[0].size(), &ch2_fft_amp_spectum_signal[0][0], &ch2_fft_amp_spectum_signal[1][0]);
-//        graph_cd12.SetTitle("Amplitude spectrum of signal (Channel 2, SiPM)");
-//        graph_cd12.GetXaxis()->SetTitle("frequensy [MHz]");
-//        graph_cd12.GetYaxis()->SetTitle("amplitude [a.u.]");
-//        canv.cd(12);
-//        graph_cd12.Draw("AP");
-//        graph_cd12.SetMarkerStyle(20);
-//        graph_cd12.SetMarkerSize(0.5);
-//        graph_cd12.SetMarkerColor(kRed);
+        TGraph graph_cd12(ch2_fft_amp_spectum_signal[0].size(), &ch2_fft_amp_spectum_signal[0][0], &ch2_fft_amp_spectum_signal[1][0]);
+        graph_cd12.SetTitle("Amplitude spectrum of signal (Channel 2, SiPM)");
+        graph_cd12.GetXaxis()->SetTitle("frequensy [MHz]");
+        graph_cd12.GetYaxis()->SetTitle("amplitude [a.u.]");
+        canv.cd(9);
+        graph_cd12.Draw("AP");
+        graph_cd12.SetMarkerStyle(20);
+        graph_cd12.SetMarkerSize(0.5);
+        graph_cd12.SetMarkerColor(kRed);
+
+        //
+        TGraph graph_cd_original_ch0(nsamps, &xv_double[0], &data[0][0]);
+        graph_cd_original_ch0.SetTitle("original(Channel 0, PMT)");
+        graph_cd_original_ch0.GetXaxis()->SetTitle("time [ns]");
+        graph_cd_original_ch0.GetYaxis()->SetTitle("amplitude[channels]");
+        canv.cd(10);
+        graph_cd_original_ch0.Draw("apl");
+
+        //
+        TGraph graph_cd_original_ch1(nsamps, &xv_double[0], &data[1][0]);
+        graph_cd_original_ch1.SetTitle("original(Channel 1, SiPM)");
+        graph_cd_original_ch1.GetXaxis()->SetTitle("time [ns]");
+        graph_cd_original_ch1.GetYaxis()->SetTitle("amplitude[channels]");
+        canv.cd(11);
+        graph_cd_original_ch1.Draw("apl");
+
+        //
+        TGraph graph_cd_original_ch2(nsamps, &xv_double[0], &data[2][0]);
+        graph_cd_original_ch2.SetTitle("original(Channel 2, SiPM)");
+        graph_cd_original_ch2.GetXaxis()->SetTitle("time [ns]");
+        graph_cd_original_ch2.GetYaxis()->SetTitle("amplitude[channels]");
+        canv.cd(12);
+        graph_cd_original_ch2.Draw("apl");
 
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_after);
@@ -498,6 +550,19 @@ int main_1pe(int argc, char *argv[])
             tree->Branch("max_abs_amp_ch0", &max_abs_amp_ch0, "max_abs_amp_ch0/D");
             tree->Branch("max_abs_amp_ch1", &max_abs_amp_ch1, "max_abs_amp_ch1/D");
             tree->Branch("max_abs_amp_ch2", &max_abs_amp_ch2, "max_abs_amp_ch2/D");
+
+            tree->Branch("min_amp_ch0", &min_amp_ch0, "min_amp_ch0/D");
+            tree->Branch("min_amp_ch1", &min_amp_ch1, "min_amp_ch1/D");
+            tree->Branch("min_amp_ch2", &min_amp_ch2, "min_amp_ch2/D");
+
+            tree->Branch("min_amp_ch0_0_2045", &min_amp_ch0_0_2045, "min_amp_ch0_0_2045/D");
+            tree->Branch("min_amp_ch0_2100_5000", &min_amp_ch0_2100_5000, "min_amp_ch0_2100_5000/D");
+
+            tree->Branch("min_amp_ch1_0_2000", &min_amp_ch1_0_2000, "min_amp_ch1_0_2000/D");
+            tree->Branch("min_amp_ch1_2800_5000", &min_amp_ch1_2800_5000, "min_amp_ch1_2800_5000/D");
+
+            tree->Branch("min_amp_ch2_0_1900", &min_amp_ch2_0_1900, "min_amp_ch2_0_1900/D");
+            tree->Branch("min_amp_ch2_2800_5000", &min_amp_ch2_2800_5000, "min_amp_ch2_2800_5000/D");
 
             tree->Branch("canvas_tr", "TCanvas", &canv);
         }

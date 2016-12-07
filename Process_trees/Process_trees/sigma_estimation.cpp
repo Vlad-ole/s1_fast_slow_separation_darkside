@@ -1,7 +1,7 @@
 using namespace RooFit;
 
 const int n_photons = 500;
-const int n_events = 500;
+const int n_events = 100;
 
 const double step = 4;//sampling rate in simulation
 const double t_w = 150;

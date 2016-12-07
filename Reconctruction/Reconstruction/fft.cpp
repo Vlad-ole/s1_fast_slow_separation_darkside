@@ -15,6 +15,8 @@ double phase(double x, double y)
     return result;
 }
 
+
+//I added normalization ( 1 / time_range), so you can't use this directly for ifft
 vector< vector<double> > Get_fft_amp_spectrum(vector<double> data, const double time_from, const double time_to, const double time_scale)
 {
     const int point_start = (int)(time_from / time_scale);
@@ -55,7 +57,10 @@ vector< vector<double> > Get_fft_amp_spectrum(vector<double> data, const double 
     for (int i = 0; i < n_size_fft; ++i)
     {
         fft_amp_spectrum[0][i] = i * delta_frequency;
-        fft_amp_spectrum[1][i] = sqrt( fft_re[i]*fft_re[i] + fft_im[i]*fft_im[i] );
+//        fft_amp_spectrum[1][i] = sqrt( fft_re[i]*fft_re[i] + fft_im[i]*fft_im[i] )
+
+        // I added normalization and delete sqrt! Be careful!
+        fft_amp_spectrum[1][i] = ( fft_re[i]*fft_re[i] + fft_im[i]*fft_im[i] ) / (time_to - time_from);
         fft_amp_spectrum[2][i] = phase(fft_re[i], fft_im[i]);
     }
 

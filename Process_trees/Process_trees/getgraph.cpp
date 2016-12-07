@@ -1,6 +1,6 @@
 void get_graph()
 {
-    TFile file1("/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees_unfold", "READ");
+    TFile file1("/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees_unfold/", "READ");
     TCanvas* canv1 = 0;
     file1.ls();
     file1.GetObject("c", canv1);

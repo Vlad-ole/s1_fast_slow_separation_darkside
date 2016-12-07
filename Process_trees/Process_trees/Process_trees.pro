@@ -41,6 +41,11 @@ SOURCES += \
     Unfolding/wunfold.cpp \
     fit_avr_am_signal_unfold.cpp \
     combinecanvas.cpp \
-    getgraph.cpp
+    getgraph.cpp \
+    getandavr.cpp \
+    overlapping.cpp \
+    overlapping_loop.cpp \
+    overlapping_problem.cpp \
+    Graph_read/graph_q_coeff.cpp
 
 HEADERS +=

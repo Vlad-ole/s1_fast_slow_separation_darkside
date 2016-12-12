@@ -6,7 +6,7 @@ void get_graph()
     file1.GetObject("c", canv1);
     file1.Close();
 
-    TPad *pad_cd = (TPad*)canv1->GetListOfPrimitives()->FindObject("c_5");
+    TPad *pad_cd = (TPad*)canv1->GetListOfPrimitives()->FindObject("c_4");
     TGraph *gh_cd = (TGraph*)pad_cd->GetListOfPrimitives()->FindObject("Graph");
 //    TGraph *gh_cd = (TGraph*)pad_cd->GetListOfPrimitives()->At(1);
 //    TGraph *gh_2 = (TGraph*)pad_cd->GetListOfPrimitives()->At(2);

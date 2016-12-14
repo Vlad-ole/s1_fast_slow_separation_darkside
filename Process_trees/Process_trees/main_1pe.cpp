@@ -2,21 +2,21 @@
 
 void ReadTree()
 {
-    gROOT->SetBatch(kTRUE); // it's really important to use this line if you save TCanvas in a tree!
+//    gROOT->SetBatch(kTRUE); // it's really important to use this line if you save TCanvas in a tree!
 
 //    //read param
-//    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
-//    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_result.root";
-//    const int run_id = 6061;
+    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
+    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_result.root";
+    const int run_id = 6061;
 
-    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees/";
-    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_result.root";
-    const int run_id = 6064;
+//    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees/";
+//    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_result.root";
+//    const int run_id = 6064;
 
 
     //processing params
     const bool advanced_processing = false;
-    const bool normal_processing = true;
+    const bool normal_processing = false;
     const double time_scale = 4;//ns
 
     TObjArray Hlist_gr(0);
@@ -27,7 +27,7 @@ void ReadTree()
 
     TChain chain("t1");// name of the tree is the argument
     //const int n_max = 22426; //Am
-    const int n_max = 1;//number of files
+    const int n_max = 100;//number of files
     for(int i = 0; i < n_max; i++)
     {
         ostringstream file_tree_oss;
@@ -46,6 +46,7 @@ void ReadTree()
     double max_abs_amp_ch0 ,max_abs_amp_ch1, max_abs_amp_ch2;
 
     double min_amp_ch0, min_amp_ch1, min_amp_ch2;
+    double min_aft_baseline_sub_ch0, min_aft_baseline_sub_ch1, min_aft_baseline_sub_ch2;
 
     double min_amp_ch0_0_2045, min_amp_ch0_2100_5000;
     double min_amp_ch1_0_2000, min_amp_ch1_2800_5000;
@@ -78,6 +79,10 @@ void ReadTree()
     chain.SetBranchAddress("min_amp_ch1", &min_amp_ch1);
     chain.SetBranchAddress("min_amp_ch2", &min_amp_ch2);
 
+    chain.SetBranchAddress("min_aft_baseline_sub_ch0", &min_aft_baseline_sub_ch0);
+    chain.SetBranchAddress("min_aft_baseline_sub_ch1", &min_aft_baseline_sub_ch1);
+    chain.SetBranchAddress("min_aft_baseline_sub_ch2", &min_aft_baseline_sub_ch2);
+
     chain.SetBranchAddress("min_amp_ch0_0_2045", &min_amp_ch0_0_2045);
     chain.SetBranchAddress("min_amp_ch0_2100_5000", &min_amp_ch0_2100_5000);
     chain.SetBranchAddress("min_amp_ch1_0_2000", &min_amp_ch1_0_2000);
@@ -89,9 +94,31 @@ void ReadTree()
     //TCut total_cut = "integral_ch2 > -50000 && integral_ch2 < 50000";
     //    TCut total_cut = "max_abs_amp_ch2 > 9 && max_abs_amp_ch2 < 14";
     //    TCut total_cut = "max_abs_amp_ch2 < 9";
-    TCut total_cut = "";
 
-    chain.SetMarkerStyle(4);
+    TCut cut_ch0 = "(min_amp_ch0 > 3800) && (min_amp_ch0_0_2045 > 4031) && (min_amp_ch0_2100_5000 > 4031)";
+    TCut cut_ch1 =  "(min_amp_ch1 > 3350) && (min_amp_ch1_0_2000 > 3410) && (min_amp_ch1_2800_5000 > 3410)";
+    TCut cut_ch2 = "(min_amp_ch2 > 3250) && (min_amp_ch2_0_1900 > 3412) && (min_amp_ch2_2800_5000 > 3412)";
+    TCut total_cut = cut_ch2 && "(max_abs_amp_ch2 > 8.8)";
+
+//    chain.SetMarkerStyle(4);
+
+    //ch2
+//    chain.Draw("integral_ch2>>h(500,-50000,10000)", total_cut);
+//    chain.Draw("max_abs_amp_ch2>>h(2000,0,120)", total_cut);
+    chain.Draw("integral_ch2>>h(400,-40000,0)", total_cut, "", 32000);
+//    chain.Draw("max_abs_amp_ch2:integral_ch2>>h2(500,-50000,10000, 500,0,200)", total_cut);
+
+
+    //ch1
+//    chain.Draw("max_abs_amp_ch1>>h(500,0,30)", total_cut);
+//    chain.Draw("integral_ch1>>h(200,-20000,0)", total_cut);
+//      chain.Draw("max_abs_amp_ch1:integral_ch1>>h2(500,-25000,10000, 500,0,60)", total_cut);
+
+    //ch0
+//    chain.Draw("-min_aft_baseline_sub_ch2>>h(500,-30,120)", "");
+
+
+
 
 //    chain.Draw("integral_ch0>>h2(500,-3500,200)", total_cut);
     //    chain.Draw("integral_ch2>>h2(300,-35000,5000)", total_cut);
@@ -102,7 +129,7 @@ void ReadTree()
     //   TH1F *h2 = (TH1F*)gDirectory->Get("h2");
     //   TH1F *h1 = (TH1F*)gDirectory->Get("h1");
 
-    //   h1->SetFillStyle(3001);
+//    h1->SetFillStyle(3001);
     //   h2->SetFillStyle(3001);
 
 
@@ -620,7 +647,7 @@ void ReadTree()
             const bool cut2_run6064_am = cut2_ch0_run6064_am && cut2_ch1_run6064_am && cut2_ch2_run6064_am;
             const bool cut_run6064_am = cut1_run6064_am && cut2_run6064_am;
 
-            if(cut_run6064_am)
+            if(cut1_ch1_run6061_spe && cut2_ch1_run6061_spe && (max_abs_amp_ch1 < 6 && max_abs_amp_ch1 > 5) && (integral_ch1 < 0) )
             {
 //                TPad *pad_cd = (TPad*)canv->GetListOfPrimitives()->FindObject("c_3");
 //                TGraph *gh_cd = (TGraph*)pad_cd->GetListOfPrimitives()->FindObject("Graph");
@@ -633,12 +660,12 @@ void ReadTree()
 
         }
 
+        cout << "Hlist_gr.GetEntries() = " << Hlist_gr.GetEntries() << endl;
+
         TFile ofile_Hlist_gr(graph_name.c_str(), "RECREATE");
         Hlist_gr.Write();
         ofile_Hlist_gr.Close();
     }
-
-
 
 
     cout << endl << "Root cern script: all is ok" << endl;

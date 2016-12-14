@@ -46,62 +46,62 @@ int main(int argc, char *argv[])
 
     //    run 6061
 //    parameters
-//    const bool is_spe = true;
-//    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe/";
-//    const string trees_dir = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
-//    const int run_id = 6061;
-//    const int time_scale = 4;//ns
-//    const int n_points_savitzky_golay = 21; // points
-//    const double time_integral_ch0_from = 2050; // ns
-//    const double time_integral_ch0_to = 2100; // ns
-//    const double time_integral_from = 1950; // ns
-//    const double time_integral_to = 1950 + 700; // ns
-//    const double time_avr_baseline_to = 1600; // ns
-//    const int events_per_file = 1000;
-//    const int max_files = 100000;
-//    //fft
-//    const double time_fft_noise_ch0_from = 0;//ns
-//    const double time_fft_noise_ch0_to = 1600;//ns
-//    const double time_fft_signal_ch0_from = time_integral_ch0_from;
-//    const double time_fft_signal_ch0_to = time_integral_ch0_to;
-
-//    const double time_fft_noise_from = 0;//ns
-//    const double time_fft_noise_to = time_avr_baseline_to;//ns
-//    const double time_fft_signal_from = 1900;
-//    const double time_fft_signal_to = 3000;
-
-//    double time_fft_total_from;
-//    double time_fft_total_to;
-//    const double cut_frequency = 5;//MHz
-
-//    //run 6064
-    const bool is_spe = false;
-    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am/";
-    const string trees_dir = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees/";
-    const int run_id = 6064;
+    const bool is_spe = true;
+    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe/";
+    const string trees_dir = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
+    const int run_id = 6061;
     const int time_scale = 4;//ns
     const int n_points_savitzky_golay = 21; // points
-    const double time_integral_ch0_from = 1900; // ns (was 1900)
-    const double time_integral_ch0_to = 14900;// ns
-    const double time_integral_from = 1900; // ns (was 1900)
-    const double time_integral_to = 14900; // ns
+    const double time_integral_ch0_from = 2050; // ns
+    const double time_integral_ch0_to = 2100; // ns
+    const double time_integral_from = 1950; // ns
+    const double time_integral_to = 1950 + 700; // ns
     const double time_avr_baseline_to = 1600; // ns
     const int events_per_file = 1000;
-    const int max_files = 100000;
-
+    const int max_files = 100;
     //fft
     const double time_fft_noise_ch0_from = 0;//ns
     const double time_fft_noise_ch0_to = 1600;//ns
-    const double time_fft_signal_ch0_from = 0; //(was time_integral_ch0_from)
+    const double time_fft_signal_ch0_from = time_integral_ch0_from;
     const double time_fft_signal_ch0_to = time_integral_ch0_to;
 
     const double time_fft_noise_from = 0;//ns
     const double time_fft_noise_to = time_avr_baseline_to;//ns
-    const double time_fft_signal_from = 0; //(was time_integral_from)
-    const double time_fft_signal_to = time_integral_to;
+    const double time_fft_signal_from = 1900;
+    const double time_fft_signal_to = 3000;
 
     double time_fft_total_from;
     double time_fft_total_to;
+    const double cut_frequency = 5;//MHz
+
+//    //run 6064
+//    const bool is_spe = false;
+//    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am/";
+//    const string trees_dir = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees/";
+//    const int run_id = 6064;
+//    const int time_scale = 4;//ns
+//    const int n_points_savitzky_golay = 21; // points
+//    const double time_integral_ch0_from = 1900; // ns (was 1900)
+//    const double time_integral_ch0_to = 14900;// ns
+//    const double time_integral_from = 1900; // ns (was 1900)
+//    const double time_integral_to = 14900; // ns
+//    const double time_avr_baseline_to = 1600; // ns
+//    const int events_per_file = 1000;
+//    const int max_files = 100;
+
+//    //fft
+//    const double time_fft_noise_ch0_from = 0;//ns
+//    const double time_fft_noise_ch0_to = 1600;//ns
+//    const double time_fft_signal_ch0_from = 0; //(was time_integral_ch0_from)
+//    const double time_fft_signal_ch0_to = time_integral_ch0_to;
+
+//    const double time_fft_noise_from = 0;//ns
+//    const double time_fft_noise_to = time_avr_baseline_to;//ns
+//    const double time_fft_signal_from = 0; //(was time_integral_from)
+//    const double time_fft_signal_to = time_integral_to;
+
+//    double time_fft_total_from;
+//    double time_fft_total_to;
 
     //
     vector<double> xv_double;
@@ -167,6 +167,7 @@ int main(int argc, char *argv[])
         double baseline_ch0, baseline_ch1, baseline_ch2;
         double max_abs_amp_ch0, max_abs_amp_ch1, max_abs_amp_ch2;
         double min_amp_ch0, min_amp_ch1, min_amp_ch2;
+        double min_aft_baseline_sub_ch0, min_aft_baseline_sub_ch1, min_aft_baseline_sub_ch2;
 
         double min_amp_ch0_0_2045, min_amp_ch0_2100_5000;
         double min_amp_ch1_0_2000, min_amp_ch1_2800_5000;
@@ -200,6 +201,10 @@ int main(int argc, char *argv[])
         min_amp_ch0 = *min_element(data[0].begin(), data[0].end());
         min_amp_ch1 = *min_element(data[1].begin(), data[1].end());
         min_amp_ch2 = *min_element(data[2].begin(), data[2].end());
+
+        min_aft_baseline_sub_ch0 = *min_element(data_minus_baseline[0].begin(), data_minus_baseline[0].end());
+        min_aft_baseline_sub_ch1 = *min_element(data_minus_baseline[1].begin(), data_minus_baseline[1].end());
+        min_aft_baseline_sub_ch2 = *min_element(data_minus_baseline[2].begin(), data_minus_baseline[2].end());
 
 
         min_amp_ch0_0_2045 = *min_element(data[0].begin(), data[0].begin() + 2045/time_scale );
@@ -570,6 +575,10 @@ int main(int argc, char *argv[])
             tree->Branch("min_amp_ch0", &min_amp_ch0, "min_amp_ch0/D");
             tree->Branch("min_amp_ch1", &min_amp_ch1, "min_amp_ch1/D");
             tree->Branch("min_amp_ch2", &min_amp_ch2, "min_amp_ch2/D");
+
+            tree->Branch("min_aft_baseline_sub_ch0", &min_aft_baseline_sub_ch0, "min_aft_baseline_sub_ch0/D");
+            tree->Branch("min_aft_baseline_sub_ch1", &min_aft_baseline_sub_ch1, "min_aft_baseline_sub_ch1/D");
+            tree->Branch("min_aft_baseline_sub_ch2", &min_aft_baseline_sub_ch2, "min_aft_baseline_sub_ch2/D");
 
             //Am run 6064
             tree->Branch("min_amp_ch0_0_1920", &min_amp_ch0_0_1920, "min_amp_ch0_0_1920/D");

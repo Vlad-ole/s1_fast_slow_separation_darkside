@@ -31,7 +31,7 @@
 
 using namespace std;
 
-int main_unf(int argc, char *argv[])
+int main_unfold(int argc, char *argv[])
 {
     struct timespec timespec_str_before, timespec_str_after, timespec_str_total_before, timespec_str_total_after;
     double t_read_file;
@@ -41,12 +41,14 @@ int main_unf(int argc, char *argv[])
     clock_gettime(CLOCK_REALTIME, &timespec_str_total_before);
 
     //read params
-//    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am/";
-//    const string trees_dir = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees_unfold/";
-    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6053_bkg/";
-    const string trees_dir = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6053_bkg_trees_unfold/";
+    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am/";
+    const string trees_dir = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees_unfold/";
+
+//    const string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6053_bkg/";
+//    const string trees_dir = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6053_bkg_trees_unfold/";
+
     const string response_file_name = "/home/darkside/Vlad_Programs/Physical_results/avg_signal_1pe.txt";
-    const int run_id = 6053;
+    const int run_id = 6064;
     const int max_files = 100000;
 
     //processing params
@@ -69,6 +71,7 @@ int main_unf(int argc, char *argv[])
     const double time_cut = time_integral_to;
 
     //integral intervals for n/g separation
+    //we should choose accurately this parameter to integrate correctly. 1800 ns will be better
     const double time_integral_unfold_fast_pmt_from = 1900;
     const double time_integral_unfold_fast_pmt_to = 2020;
 
@@ -131,11 +134,35 @@ int main_unf(int argc, char *argv[])
             cout << "data[2].size() = " << data[2].size() << endl;
             continue;
         }
+
+        //let's add some branches in order to simplify code with cuts
+        //general
+        double min_amp_ch0, min_amp_ch1, min_amp_ch2;
+
+        //Am run
+        double min_amp_ch0_0_1920;
+        double min_amp_ch1_0_1800, min_amp_ch1_8000_15000;
+        double min_amp_ch2_0_1800, min_amp_ch2_8000_15000;
+
+        min_amp_ch0 = *min_element(data[0].begin(), data[0].end());
+        min_amp_ch1 = *min_element(data[1].begin(), data[1].end());
+        min_amp_ch2 = *min_element(data[2].begin(), data[2].end());
+
+        min_amp_ch0_0_1920 = *min_element(data[0].begin(), data[0].begin() + 1920/time_scale );;
+
+        min_amp_ch1_0_1800 = *min_element(data[1].begin(), data[1].begin() + 1800/time_scale );
+        min_amp_ch1_8000_15000 = *min_element(data[1].begin() + 8000/time_scale, data[1].end() );
+
+        min_amp_ch2_0_1800 = *min_element(data[2].begin(), data[2].begin() + 1800/time_scale );
+        min_amp_ch2_8000_15000 = *min_element(data[2].begin() + 8000/time_scale, data[2].end() );
+
         //if x > time_cut then stop to fill vector (in order to minimize CPU time)
         data[0] = vector_cut_time(data[0], time_cut / time_scale);
         data[1] = vector_cut_time(data[1], time_cut / time_scale);
         data[2] = vector_cut_time(data[2], time_cut / time_scale);
         const int nsamps = data[0].size();
+
+
 
         //it is better to work with positive waveforms
         if(waveform_sign > 0)
@@ -169,6 +196,7 @@ int main_unf(int argc, char *argv[])
         //set variables to save in tree
         double integral_ch0, integral_ch1, integral_ch2;
         double baseline_ch0, baseline_ch1, baseline_ch2;
+
 
         clock_gettime(CLOCK_REALTIME, &timespec_str_before);
         //calcucate baseline
@@ -417,6 +445,18 @@ int main_unf(int argc, char *argv[])
             tree->Branch("baseline_ch0", &baseline_ch0, "baseline_ch0/D");
             tree->Branch("baseline_ch1", &baseline_ch1, "baseline_ch1/D");
             tree->Branch("baseline_ch2", &baseline_ch2, "baseline_ch2/D");
+
+            //for cuts (in general)
+            tree->Branch("min_amp_ch0", &min_amp_ch0, "min_amp_ch0/D");
+            tree->Branch("min_amp_ch1", &min_amp_ch1, "min_amp_ch1/D");
+            tree->Branch("min_amp_ch2", &min_amp_ch2, "min_amp_ch2/D");
+
+            //for cuts (Am run 6064)
+            tree->Branch("min_amp_ch0_0_1920", &min_amp_ch0_0_1920, "min_amp_ch0_0_1920/D");
+            tree->Branch("min_amp_ch1_0_1800", &min_amp_ch1_0_1800, "min_amp_ch1_0_1800/D");
+            tree->Branch("min_amp_ch1_8000_15000", &min_amp_ch1_8000_15000, "min_amp_ch1_8000_15000/D");
+            tree->Branch("min_amp_ch2_0_1800", &min_amp_ch2_0_1800, "min_amp_ch2_0_1800/D");
+            tree->Branch("min_amp_ch2_8000_15000", &min_amp_ch2_8000_15000, "min_amp_ch2_8000_15000/D");
 
             tree->Branch("canvas_tr", "TCanvas", &canv);
         }

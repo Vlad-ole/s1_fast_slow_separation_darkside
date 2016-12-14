@@ -1,11 +1,11 @@
 using namespace RooFit;
 
-const int n_photons = 500;
-const int n_events = 100;
+const int n_photons = 18;
+const int n_events = 5000;
 
 const double step = 4;//sampling rate in simulation
-const double t_w = 150;
-const double fraction = 0.2308;
+const double t_w = 200;
+const double fraction = 1 - 0.523;// fast / total
 const double sigma_response = 33;
 
 int counter(RooDataSet* data, double t_from, double t_to)
@@ -93,7 +93,7 @@ void estimate_sigma()
     //define sum_pdf
     RooRealVar t("t","t",0,8000);
     RooRealVar tau_fast("tau_fast","tau_fast parameter", 7);
-    RooRealVar tau_slow("tau_slow","tau_slow parameter", 1700);
+    RooRealVar tau_slow("tau_slow","tau_slow parameter", 1600);
     RooGenericPdf exp_pdf_fast("exp_pdf_fast","exp_pdf_fast","( 1 / tau_fast * exp( - t / tau_fast ) )", RooArgSet(t, tau_fast));
     RooGenericPdf exp_pdf_slow("exp_pdf_slow","exp_pdf_slow","( 1 / tau_slow * exp( - t / tau_slow ) )", RooArgSet(t, tau_slow));
     RooRealVar frac("frac","fast fraction",fraction);// <------  choose fraction of fast component

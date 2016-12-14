@@ -46,6 +46,7 @@ SOURCES += \
     overlapping.cpp \
     overlapping_loop.cpp \
     overlapping_problem.cpp \
-    Graph_read/graph_q_coeff.cpp
+    Graph_read/graph_q_coeff.cpp \
+    integral_ratio.cpp
 
 HEADERS +=

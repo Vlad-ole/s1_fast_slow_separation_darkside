@@ -78,7 +78,14 @@ SOURCES       = ../Process_trees/fft.cpp \
 		../Process_trees/Unfolding/unfolding_wiener.cpp \
 		../Process_trees/Unfolding/wunfold.cpp \
 		../Process_trees/fit_avr_am_signal_unfold.cpp \
-		../Process_trees/combinecanvas.cpp 
+		../Process_trees/combinecanvas.cpp \
+		../Process_trees/getgraph.cpp \
+		../Process_trees/getandavr.cpp \
+		../Process_trees/overlapping.cpp \
+		../Process_trees/overlapping_loop.cpp \
+		../Process_trees/overlapping_problem.cpp \
+		../Process_trees/Graph_read/graph_q_coeff.cpp \
+		../Process_trees/integral_ratio.cpp 
 OBJECTS       = fft.o \
 		canvas.o \
 		unfolding.o \
@@ -109,7 +116,14 @@ OBJECTS       = fft.o \
 		unfolding_wiener.o \
 		wunfold.o \
 		fit_avr_am_signal_unfold.o \
-		combinecanvas.o
+		combinecanvas.o \
+		getgraph.o \
+		getandavr.o \
+		overlapping.o \
+		overlapping_loop.o \
+		overlapping_problem.o \
+		graph_q_coeff.o \
+		integral_ratio.o
 DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt5/mkspecs/common/unix.conf \
 		/usr/lib64/qt5/mkspecs/common/linux.conf \
@@ -195,7 +209,14 @@ DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		../Process_trees/Unfolding/unfolding_wiener.cpp \
 		../Process_trees/Unfolding/wunfold.cpp \
 		../Process_trees/fit_avr_am_signal_unfold.cpp \
-		../Process_trees/combinecanvas.cpp
+		../Process_trees/combinecanvas.cpp \
+		../Process_trees/getgraph.cpp \
+		../Process_trees/getandavr.cpp \
+		../Process_trees/overlapping.cpp \
+		../Process_trees/overlapping_loop.cpp \
+		../Process_trees/overlapping_problem.cpp \
+		../Process_trees/Graph_read/graph_q_coeff.cpp \
+		../Process_trees/integral_ratio.cpp
 QMAKE_TARGET  = Process_trees
 DESTDIR       = 
 TARGET        = Process_trees
@@ -337,7 +358,7 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib64/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../Process_trees/fft.cpp ../Process_trees/canvas.cpp unfolding.cpp ../Process_trees/main_1pe.cpp ../Process_trees/main_unfold.cpp ../Process_trees/fit_avr_am_signal.cpp ../Process_trees/otonu_help.cpp test_vector.cpp test_parse.cpp graph_tree.cpp graph_simulation.cpp graph_real.cpp ../Process_trees/sigma_estimation.cpp graph_sep_prob.cpp ../Process_trees/read_slices.cpp graph_sigma_comparison.cpp unfolding_example.cpp unfolding_wiener.cpp ../Process_trees/Graph_read/graph_real.cpp ../Process_trees/Graph_read/graph_sep_prob.cpp ../Process_trees/Graph_read/graph_sigma_comparison.cpp ../Process_trees/Graph_read/graph_simulation.cpp ../Process_trees/Graph_read/graph_tree.cpp ../Process_trees/test/test_parse.cpp ../Process_trees/test/test_vector.cpp ../Process_trees/Unfolding/unfolding.cpp ../Process_trees/Unfolding/unfolding_example.cpp ../Process_trees/Unfolding/unfolding_wiener.cpp ../Process_trees/Unfolding/wunfold.cpp ../Process_trees/fit_avr_am_signal_unfold.cpp ../Process_trees/combinecanvas.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../Process_trees/fft.cpp ../Process_trees/canvas.cpp unfolding.cpp ../Process_trees/main_1pe.cpp ../Process_trees/main_unfold.cpp ../Process_trees/fit_avr_am_signal.cpp ../Process_trees/otonu_help.cpp test_vector.cpp test_parse.cpp graph_tree.cpp graph_simulation.cpp graph_real.cpp ../Process_trees/sigma_estimation.cpp graph_sep_prob.cpp ../Process_trees/read_slices.cpp graph_sigma_comparison.cpp unfolding_example.cpp unfolding_wiener.cpp ../Process_trees/Graph_read/graph_real.cpp ../Process_trees/Graph_read/graph_sep_prob.cpp ../Process_trees/Graph_read/graph_sigma_comparison.cpp ../Process_trees/Graph_read/graph_simulation.cpp ../Process_trees/Graph_read/graph_tree.cpp ../Process_trees/test/test_parse.cpp ../Process_trees/test/test_vector.cpp ../Process_trees/Unfolding/unfolding.cpp ../Process_trees/Unfolding/unfolding_example.cpp ../Process_trees/Unfolding/unfolding_wiener.cpp ../Process_trees/Unfolding/wunfold.cpp ../Process_trees/fit_avr_am_signal_unfold.cpp ../Process_trees/combinecanvas.cpp ../Process_trees/getgraph.cpp ../Process_trees/getandavr.cpp ../Process_trees/overlapping.cpp ../Process_trees/overlapping_loop.cpp ../Process_trees/overlapping_problem.cpp ../Process_trees/Graph_read/graph_q_coeff.cpp ../Process_trees/integral_ratio.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -474,6 +495,27 @@ fit_avr_am_signal_unfold.o: ../Process_trees/fit_avr_am_signal_unfold.cpp
 
 combinecanvas.o: ../Process_trees/combinecanvas.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o combinecanvas.o ../Process_trees/combinecanvas.cpp
+
+getgraph.o: ../Process_trees/getgraph.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o getgraph.o ../Process_trees/getgraph.cpp
+
+getandavr.o: ../Process_trees/getandavr.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o getandavr.o ../Process_trees/getandavr.cpp
+
+overlapping.o: ../Process_trees/overlapping.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o overlapping.o ../Process_trees/overlapping.cpp
+
+overlapping_loop.o: ../Process_trees/overlapping_loop.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o overlapping_loop.o ../Process_trees/overlapping_loop.cpp
+
+overlapping_problem.o: ../Process_trees/overlapping_problem.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o overlapping_problem.o ../Process_trees/overlapping_problem.cpp
+
+graph_q_coeff.o: ../Process_trees/Graph_read/graph_q_coeff.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o graph_q_coeff.o ../Process_trees/Graph_read/graph_q_coeff.cpp
+
+integral_ratio.o: ../Process_trees/integral_ratio.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o integral_ratio.o ../Process_trees/integral_ratio.cpp
 
 ####### Install
 

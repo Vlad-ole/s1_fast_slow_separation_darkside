@@ -3,20 +3,20 @@ TGraph* getandavr(string canv_name)
 //    gROOT->SetBatch(kTRUE);
 
     //read param
-//    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
-//    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_result.root";
-//    const int run_id = 6061;
+    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
+    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_result.root";
+    const int run_id = 6061;
 
-    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees/";
-    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_result.root";
-    const int run_id = 6064;
+//    string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees/";
+//    string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_result.root";
+//    const int run_id = 6064;
 
     const double time_scale = 4;//ns
     TObjArray Hlist_gr(0);
     Hlist_gr.SetOwner(kTRUE);
     TChain chain("t1");// name of the tree is the argument
 
-    const int n_max = 10;//number of files
+    const int n_max = 1;//number of files
     for(int i = 0; i < n_max; i++)
     {
         ostringstream file_tree_oss;
@@ -30,6 +30,7 @@ TGraph* getandavr(string canv_name)
     TCanvas* canv = 0;
 
     double min_amp_ch0, min_amp_ch1, min_amp_ch2;
+    double max_abs_amp_ch0, max_abs_amp_ch1, max_abs_amp_ch2;
 
     //run spe 6061
     double min_amp_ch0_0_2045, min_amp_ch0_2100_5000;
@@ -46,6 +47,10 @@ TGraph* getandavr(string canv_name)
     chain.SetBranchAddress("min_amp_ch0", &min_amp_ch0);
     chain.SetBranchAddress("min_amp_ch1", &min_amp_ch1);
     chain.SetBranchAddress("min_amp_ch2", &min_amp_ch2);
+
+    chain.SetBranchAddress("max_abs_amp_ch0", &max_abs_amp_ch0);
+    chain.SetBranchAddress("max_abs_amp_ch1", &max_abs_amp_ch1);
+    chain.SetBranchAddress("max_abs_amp_ch2", &max_abs_amp_ch2);
 
     //run spe 6061
     chain.SetBranchAddress("min_amp_ch0_0_2045", &min_amp_ch0_0_2045);
@@ -71,7 +76,7 @@ TGraph* getandavr(string canv_name)
     vector<double> yv;
 
     const int n_entr = chain.GetEntries();
-//    const int n_entr = 100;
+//    const int n_entr = 1000;
     for (int i = 0; i < n_entr; ++i)
     {
         chain.GetEntry(i);
@@ -107,7 +112,7 @@ TGraph* getandavr(string canv_name)
         const bool cut2_run6064_am = cut2_ch0_run6064_am && cut2_ch1_run6064_am && cut2_ch2_run6064_am;
         const bool cut_run6064_am = cut1_run6064_am && cut2_run6064_am;
 
-        if(cut_run6064_am)
+        if(cut1_ch0_run6061_spe && cut2_ch0_run6061_spe && (max_abs_amp_ch0 > 15) )
         {
             cut_event_counter++;
 
@@ -116,10 +121,14 @@ TGraph* getandavr(string canv_name)
 
             if(gh_cd1 == NULL) cout << "graph pnt in null" << endl;
 
+            if(gh_cd1->GetN() != 1248)
+                cout << "i = " << i <<" ;gh_cd1->GetN() = " << gh_cd1->GetN() << endl;
+
             if(is_first_time)
             {
                 is_first_time = false;
                 size = gh_cd1->GetN();
+
 
                 xv.resize(size);
                 yv.resize(size);
@@ -131,10 +140,13 @@ TGraph* getandavr(string canv_name)
                 }
             }
 
+
+
             for (int k = 0; k < size; ++k)
             {
                 double x, y;
                 gh_cd1->GetPoint(k, x, y);
+//                cout << k << " " << x << " " << y << endl;
                 yv[k] += y;
             }
 
@@ -147,7 +159,9 @@ TGraph* getandavr(string canv_name)
         yv[i] /= cut_event_counter;
     }
 
+    cout << "n_entr = " << n_entr << endl;
     cout << "cut_event_counter = " << cut_event_counter << endl;
+    cout << "passed events [%] = " << (100.0 * cut_event_counter) / n_entr  << endl;
     return ( new TGraph(xv.size(), &xv[0], &yv[0]) );
 
 }
@@ -155,55 +169,59 @@ TGraph* getandavr(string canv_name)
 void DrawGraph()
 {
     TCanvas *canv_result = new TCanvas("c", "c", 0, 0, 1900, 1500);
-    canv_result->SetLogy();
+//    canv_result->SetLogy();
 
-    TGraph* graph_result = getandavr("c_4");
+    TGraph* graph_result = getandavr("c_1");
     graph_result->SetName("gr_1");
-    graph_result->SetTitle("Power spectral density");
-    graph_result->GetXaxis()->SetTitle("frequency [MHz]");
-    graph_result->GetYaxis()->SetTitle("amplitude[channels^2 / GHz]");//
+//    graph_result->SetTitle("Power spectral density");
+//    graph_result->GetXaxis()->SetTitle("frequency [MHz]");
+//    graph_result->GetYaxis()->SetTitle("amplitude[channels^2 / GHz]");//
+    graph_result->SetTitle("");
+    graph_result->GetXaxis()->SetTitle("time [ns]");
+    graph_result->GetYaxis()->SetTitle("amplitude [channels]");//
     graph_result->SetMarkerStyle(20);
     graph_result->SetMarkerSize(1);
-    graph_result->SetMarkerColor(kRed);
+    graph_result->SetMarkerColor(kBlack);
+//    graph_result->GetYaxis()->SetRangeUser(-30, 5);
     graph_result->Draw("apl");
 
-    TGraph* graph_result_2 = getandavr("c_7");
-    graph_result_2->SetName("gr_2");
-    graph_result_2->SetMarkerStyle(20);
-    graph_result_2->SetMarkerSize(1);
-    graph_result_2->SetMarkerColor(kGreen);
-    graph_result_2->Draw("same pl");
+//    TGraph* graph_result_2 = getandavr("c_7");
+//    graph_result_2->SetName("gr_2");
+//    graph_result_2->SetMarkerStyle(20);
+//    graph_result_2->SetMarkerSize(1);
+//    graph_result_2->SetMarkerColor(kGreen);
+//    graph_result_2->Draw("same pl");
 
-    TGraph* graph_result_3 = getandavr("c_5");
-    graph_result_3->SetName("gr_3");
-    graph_result_3->SetMarkerStyle(34);
-    graph_result_3->SetMarkerSize(1);
-    graph_result_3->SetMarkerColor(kBlue);
-    graph_result_3->Draw("same pl");
+//    TGraph* graph_result_3 = getandavr("c_5");
+//    graph_result_3->SetName("gr_3");
+//    graph_result_3->SetMarkerStyle(34);
+//    graph_result_3->SetMarkerSize(1);
+//    graph_result_3->SetMarkerColor(kBlue);
+//    graph_result_3->Draw("same pl");
 
-    TGraph* graph_result_4 = getandavr("c_8");
-    graph_result_4->SetName("gr_4");
-    graph_result_4->SetMarkerStyle(34);
-    graph_result_4->SetMarkerSize(1);
-    graph_result_4->SetMarkerColor(7);
-    graph_result_4->Draw("same pl");
+//    TGraph* graph_result_4 = getandavr("c_8");
+//    graph_result_4->SetName("gr_4");
+//    graph_result_4->SetMarkerStyle(34);
+//    graph_result_4->SetMarkerSize(1);
+//    graph_result_4->SetMarkerColor(7);
+//    graph_result_4->Draw("same pl");
 
-    TGraph* graph_result_5 = getandavr("c_6");
-    graph_result_5->SetName("gr_5");
-    graph_result_5->SetMarkerStyle(20);
-    graph_result_5->SetMarkerSize(1);
-    graph_result_5->SetMarkerColor(46);
-    graph_result_5->Draw("same pl");
+//    TGraph* graph_result_5 = getandavr("c_6");
+//    graph_result_5->SetName("gr_5");
+//    graph_result_5->SetMarkerStyle(20);
+//    graph_result_5->SetMarkerSize(1);
+//    graph_result_5->SetMarkerColor(46);
+//    graph_result_5->Draw("same pl");
 
-    TGraph* graph_result_6 = getandavr("c_9");
-    graph_result_6->SetName("gr_6");
-    graph_result_6->SetMarkerStyle(20);
-    graph_result_6->SetMarkerSize(1);
-    graph_result_6->SetMarkerColor(9);
-    graph_result_6->Draw("same pl");
+//    TGraph* graph_result_6 = getandavr("c_9");
+//    graph_result_6->SetName("gr_6");
+//    graph_result_6->SetMarkerStyle(20);
+//    graph_result_6->SetMarkerSize(1);
+//    graph_result_6->SetMarkerColor(9);
+//    graph_result_6->Draw("same pl");
 
 
-    leg = new TLegend(0.9,0.7,1.0,0.9);
+//    leg = new TLegend(0.9,0.7,1.0,0.9);
 
     //1
 //    leg->AddEntry("gr_1","ch0 (PMT), noise (0,1600)ns","lp");
@@ -214,13 +232,13 @@ void DrawGraph()
 //    leg->AddEntry("gr_6","ch2 (SiPM), signal (1900,3000)ns","lp");
 
     //2
-    leg->AddEntry("gr_1","ch0 (PMT), noise (0,1600)ns","lp");
-    leg->AddEntry("gr_2","ch0 (PMT), signal (0,14900)ns","lp");
-    leg->AddEntry("gr_3","ch1 (SiPM), noise (0,1600)ns","lp");
-    leg->AddEntry("gr_4","ch1 (SiPM), signal (0,14900)ns","lp");
-    leg->AddEntry("gr_5","ch2 (SiPM), noise (0,1600)ns","lp");
-    leg->AddEntry("gr_6","ch2 (SiPM), signal (0,14900)ns","lp");
+//    leg->AddEntry("gr_1","ch0 (PMT), noise (0,1600)ns","lp");
+//    leg->AddEntry("gr_2","ch0 (PMT), signal (0,14900)ns","lp");
+//    leg->AddEntry("gr_3","ch1 (SiPM), noise (0,1600)ns","lp");
+//    leg->AddEntry("gr_4","ch1 (SiPM), signal (0,14900)ns","lp");
+//    leg->AddEntry("gr_5","ch2 (SiPM), noise (0,1600)ns","lp");
+//    leg->AddEntry("gr_6","ch2 (SiPM), signal (0,14900)ns","lp");
 
 
-    leg->Draw();
+//    leg->Draw();
 }

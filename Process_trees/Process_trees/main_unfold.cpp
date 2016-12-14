@@ -1,9 +1,9 @@
-void ReadTree_unfold()
+void main_unfold()
 {
     //processing params
     const bool advanced_processing = false;
-    const bool normal_processing = true;
-    const bool simple_processing = false;
+    const bool normal_processing = false;
+    const bool simple_processing = true;
 
     string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_trees_unfold/";
     string graph_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6064_Am_result_unfold.root";
@@ -21,7 +21,7 @@ void ReadTree_unfold()
 
     TChain chain("t1");
 
-    const int n_max = 1900;//number of files
+    const int n_max = 1860;//number of files
     for(int i = 0; i < n_max; i++)
     {
         ostringstream file_tree_oss;
@@ -39,6 +39,17 @@ void ReadTree_unfold()
     double integral_ch0_unfold_total, integral_ch1_unfold_total, integral_ch2_unfold_total;
     double integral_ch0_unfold_fast, integral_ch1_unfold_fast, integral_ch2_unfold_fast;
 
+    //let's add some branches in order to simplify code with cuts
+    //general
+    double min_amp_ch0, min_amp_ch1, min_amp_ch2;
+
+    //Am run
+    double min_amp_ch0_0_1920;
+    double min_amp_ch1_0_1800, min_amp_ch1_8000_15000;
+    double min_amp_ch2_0_1800, min_amp_ch2_8000_15000;
+
+
+
     chain.SetBranchAddress("canvas_tr", &canv);
 
     chain.SetBranchAddress("integral_ch0", &integral_ch0);
@@ -53,26 +64,68 @@ void ReadTree_unfold()
     chain.SetBranchAddress("integral_ch1_unfold_fast", &integral_ch1_unfold_fast);
     chain.SetBranchAddress("integral_ch2_unfold_fast", &integral_ch2_unfold_fast);
 
+    //for Am run
+    chain.SetBranchAddress("min_amp_ch0_0_1920", &min_amp_ch0_0_1920);
+    chain.SetBranchAddress("min_amp_ch1_0_1800", &min_amp_ch1_0_1800);
+    chain.SetBranchAddress("min_amp_ch1_8000_15000", &min_amp_ch1_8000_15000);
+    chain.SetBranchAddress("min_amp_ch2_0_1800", &min_amp_ch2_0_1800);
+    chain.SetBranchAddress("min_amp_ch2_8000_15000", &min_amp_ch2_8000_15000);
+
+    chain.SetBranchAddress("min_amp_ch0", &min_amp_ch0);
+    chain.SetBranchAddress("min_amp_ch1", &min_amp_ch1);
+    chain.SetBranchAddress("min_amp_ch2", &min_amp_ch2);
+
+
+
+
+    //ch0
+    const bool cut1_ch0_run6064_am = (min_amp_ch0 > 200);
+    const bool cut2_ch0_run6064_am = (min_amp_ch0_0_1920 > 4030) && (min_amp_ch0_0_1920 < 4050);
+
+    //ch1
+    const bool cut1_ch1_run6064_am = (min_amp_ch1 > 2250);
+    const bool cut2_ch1_run6064_am = (min_amp_ch1_0_1800 > 3410) && (min_amp_ch1_0_1800 < 3430) && (min_amp_ch1_8000_15000 > 3300);
+
+    //ch2
+    const bool cut1_ch2_run6064_am = (min_amp_ch2 > 2250);
+    const bool cut2_ch2_run6064_am = (min_amp_ch2_0_1800 > 3412) && (min_amp_ch2_0_1800 < 3430) && (min_amp_ch2_8000_15000 > 3300);
+
+    //total
+    const bool cut1_run6064_am = cut1_ch0_run6064_am && cut1_ch1_run6064_am && cut1_ch2_run6064_am;
+    const bool cut2_run6064_am = cut2_ch0_run6064_am && cut2_ch1_run6064_am && cut2_ch2_run6064_am;
+    const bool cut_run6064_am = cut1_run6064_am && cut2_run6064_am;
+
+
+
+
+
     if(simple_processing)
     {
         cout << "simple_processing" << endl;
         gROOT->SetBatch(kFALSE);
 //        gROOT->SetBatch(kTRUE);
 
-        TCut cut = "(integral_ch2_unfold_total / 1484.0) > 10 && (integral_ch2_unfold_fast / integral_ch2_unfold_total) > 0.1 && (integral_ch2_unfold_fast / integral_ch2_unfold_total) < 0.6";
+//        TCut cut = "(integral_ch2_unfold_total / 1484.0) > 10 && (integral_ch2_unfold_fast / integral_ch2_unfold_total) > 0.1 && (integral_ch2_unfold_fast / integral_ch2_unfold_total) < 0.6";
 
+
+
+        TCut cut1 = "(min_amp_ch2 > 2250)";
+        TCut cut2 = "(min_amp_ch2_0_1800 > 3412) && (min_amp_ch2_0_1800 < 3430) && (min_amp_ch2_8000_15000 > 3300)";
+        TCut cut = cut1 && cut2;
 
 //        chain.Draw("integral_ch2_unfold_fast/integral_ch2_unfold_total>>hist(500, 0, 1)");
-        chain.Draw("(integral_ch2_unfold_total / 1484.0)>>hist(500, -500, 8000)", cut);
-//        chain.Draw("integral_ch2");
+//        chain.Draw("(integral_ch2_unfold_total / 1484.0)>>hist(500, -500, 8000)", cut);
+//        chain.Draw("(integral_ch0 / 587.9)>>hist(500, -200, 1500)");
+//        chain.Draw("(integral_ch0 / 587.9)");
 
 
-//        chain.Draw("(integral_ch2_unfold_fast / integral_ch2_unfold_total):(integral_ch2_unfold_total / 1484.0) >>hist2(200, 0, 1200, 200, 0, 1)", "(integral_ch2_unfold_total / 1484.0) < 1200", "COLz");
-//        Double_t levels[] = {0, 2, 6, 10, 15, 20, 25, 30, 60, 100, 200};
-//        hist2->SetContour((sizeof(levels)/sizeof(Double_t)), levels);
-//        c1->SetLogz();
-
-
+        chain.Draw("(integral_ch2_unfold_fast / integral_ch2_unfold_total):(integral_ch2_unfold_total / 1484.0) >>hist2(200, 0, 1000, 200, 0, 1)", cut, "COLz");
+        Double_t levels[] = {0, 2, 6, 10, 15, 20, 25, 30, 60, 100, 200};
+        hist2->SetContour((sizeof(levels)/sizeof(Double_t)), levels);
+        c1->SetLogz();
+        hist2->GetXaxis()->SetTitle("N_pe");
+        hist2->GetYaxis()->SetTitle("I_fast / I_total");
+        hist2->SetTitle("");
 
 
 

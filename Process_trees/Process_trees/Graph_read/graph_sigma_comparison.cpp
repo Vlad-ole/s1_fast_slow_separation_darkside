@@ -1,7 +1,8 @@
 vector< vector<double> > Get_sigma_npe(const int identificator)
 {
     ifstream input_file;
-    input_file.open("/home/darkside/Vlad_Programs/Physical_results/sep_prob_simulation.txt");
+//    input_file.open("/home/darkside/Vlad_Programs/Physical_results/sep_prob_simulation.txt");
+    input_file.open("/home/darkside/Vlad_Programs/Physical_results/sep_prob_simulation_a_vs_E.txt");
     if(!input_file.is_open())
     {
         cout << "error in file.open = " << file_name << endl;
@@ -20,10 +21,11 @@ vector< vector<double> > Get_sigma_npe(const int identificator)
         {
             std::istringstream iss(line);
             int id, N_ph_i;
-            double time_of_right_edge_d, mean_d, sigma_d;
+            double time_of_right_edge_d, mean_d, sigma_d, E_d;
 
             //while the iss is a number
-            while ((iss >> id >> time_of_right_edge_d >> mean_d >> sigma_d >> N_ph_i))
+//            while ((iss >> id >> time_of_right_edge_d >> mean_d >> sigma_d >> N_ph_i))
+            while (iss >> id >> E_d >> N_ph_i >> time_of_right_edge_d >> mean_d >> sigma_d )
             {
                 if(id == identificator)
                 {
@@ -39,8 +41,8 @@ vector< vector<double> > Get_sigma_npe(const int identificator)
 
 void graph_sigma_comparison()
 {
-    TFile f("/home/darkside/Vlad_Programs/Physical_results/run_6053_bg_slices.root");
-    TFile f2("/home/darkside/Vlad_Programs/Physical_results/run_6064_Am_slices.root");
+    TFile f("/home/darkside/Vlad_Programs/Physical_results/root/run_6053_bg_slices.root");
+    TFile f2("/home/darkside/Vlad_Programs/Physical_results/root/run_6064_Am_slices.root");
     TTree *tree = (TTree*)f.Get("t_slices");
     TTree *tree2 = (TTree*)f2.Get("t_slices");
 
@@ -91,20 +93,23 @@ void graph_sigma_comparison()
 //    vector< vector<double> > sim_data_500 = Get_sigma_npe(7);
 //    vector< vector<double> > sim_data_tw20_res10 = Get_sigma_npe(8);
     vector< vector<double> > sim_data_tw200_res33 = Get_sigma_npe(9);
+    vector< vector<double> > sim_data_tw200_res33_a_vs_e = Get_sigma_npe(1);
 
 
-//    TCanvas* canv = new TCanvas("c", "c", 0, 0, 1900, 1500);
+    TCanvas* canv = new TCanvas("c", "c", 0, 0, 1900, 1500);
+    canv->SetGrid();
 //    tree->Draw("sigma:(N_ph_from+5)", "", "pl");
 
     TGraph *gr_cd1 = new TGraph(sigma[0].size(), &n_pe[0][0], &sigma[0][0]);
     gr_cd1->SetName("gr_cd1");
 //    gr_cd1->GetYaxis()->SetRangeUser(1E-3,1);
     gr_cd1->SetTitle("Comparison of real and ideal sigma");
-    gr_cd1->GetXaxis()->SetTitle("n_pe");
+    gr_cd1->GetXaxis()->SetTitle("N_pe");
     gr_cd1->GetYaxis()->SetTitle("sigma");
     gr_cd1->SetMarkerStyle(20);
     gr_cd1->SetMarkerSize(1);
     gr_cd1->SetMarkerColor(kBlue);
+    gr_cd1->GetXaxis()->SetNdivisions(20);
     gr_cd1->Draw();
 
     TGraph *gr_cd1_2 = new TGraph(sigma[1].size(), &n_pe[1][0], &sigma[1][0]);
@@ -121,12 +126,12 @@ void graph_sigma_comparison()
     gr_cd1_3->SetMarkerColor(kGreen);
     gr_cd1_3->Draw("same pl");
 
-//    TGraph *gr_cd1_4 = new TGraph(sim_data_200[0].size(), &sim_data_200[0][0], &sim_data_200[1][0]);
-//    gr_cd1_4->SetName("gr_cd1_4");
-//    gr_cd1_4->SetMarkerStyle(20);
-//    gr_cd1_4->SetMarkerSize(1);
-//    gr_cd1_4->SetMarkerColor(kYellow);
-//    gr_cd1_4->Draw("same pl");
+    TGraph *gr_cd1_4 = new TGraph(sim_data_tw200_res33_a_vs_e[0].size(), &sim_data_tw200_res33_a_vs_e[0][0], &sim_data_tw200_res33_a_vs_e[1][0]);
+    gr_cd1_4->SetName("gr_cd1_4");
+    gr_cd1_4->SetMarkerStyle(20);
+    gr_cd1_4->SetMarkerSize(1);
+    gr_cd1_4->SetMarkerColor(kBlack);
+    gr_cd1_4->Draw("same pl");
 
 //    TGraph *gr_cd1_5 = new TGraph(sim_data_500[0].size(), &sim_data_500[0][0], &sim_data_500[1][0]);
 //    gr_cd1_5->SetName("gr_cd1_5");
@@ -153,8 +158,8 @@ void graph_sigma_comparison()
     leg = new TLegend(0.9,0.7,1.0,0.9);
     leg->AddEntry("gr_cd1","Run 6053 bg ch2, t_w 200ns, 100it ~ 33ns sigma","lp");
     leg->AddEntry("gr_cd1_2","Run 6064 Am ch2, t_w 200ns, 100it ~ 33ns sigma","lp");
-    leg->AddEntry("gr_cd1_3","Sim, gauss resp=33ns, t_w 200ns. maen_exp = mean_sim = 0.315","lp");
-//    leg->AddEntry("gr_cd1_4","Sim, gauss resp=33ns, t_w 200ns","lp");
+    leg->AddEntry("gr_cd1_3","Sim, gauss resp=33ns, t_w 200ns. A = 0.2308","lp");
+    leg->AddEntry("gr_cd1_4","Sim, gauss resp=33ns, t_w 200ns, A vs E","lp");
 //    leg->AddEntry("gr_cd1_5","Sim, gauss resp=33ns, t_w 500ns","lp");
 //    leg->AddEntry("gr_cd1_6","Sim, delta, t_w 20ns","lp");
 //    leg->AddEntry("gr_cd1_7","Sim, gauss resp=10ns, t_w 20ns","lp");

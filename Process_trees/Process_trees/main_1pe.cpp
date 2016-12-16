@@ -2,7 +2,7 @@
 
 void ReadTree()
 {
-//    gROOT->SetBatch(kTRUE); // it's really important to use this line if you save TCanvas in a tree!
+    gROOT->SetBatch(kTRUE); // it's really important to use this line if you save TCanvas in a tree!
 
 //    //read param
     string dir_name = "/home/darkside/Vlad_Programs/vlad_rawdata/Run6061_1pe_trees/";
@@ -27,7 +27,7 @@ void ReadTree()
 
     TChain chain("t1");// name of the tree is the argument
     //const int n_max = 22426; //Am
-    const int n_max = 100;//number of files
+    const int n_max = 1;//number of files
     for(int i = 0; i < n_max; i++)
     {
         ostringstream file_tree_oss;
@@ -105,7 +105,8 @@ void ReadTree()
     //ch2
 //    chain.Draw("integral_ch2>>h(500,-50000,10000)", total_cut);
 //    chain.Draw("max_abs_amp_ch2>>h(2000,0,120)", total_cut);
-    chain.Draw("integral_ch2>>h(400,-40000,0)", total_cut, "", 32000);
+//    chain.Draw("integral_ch2>>h(400,-40000,0)", total_cut, "");
+//    chain.Draw("integral_ch2", "");
 //    chain.Draw("max_abs_amp_ch2:integral_ch2>>h2(500,-50000,10000, 500,0,200)", total_cut);
 
 
@@ -611,7 +612,7 @@ void ReadTree()
     if(normal_processing)
     {
         const int n_entr = chain.GetEntries();
-        for (int i = 0; i < n_entr; ++i)
+        for (int i = 0; i < 1; ++i)
         {
             chain.GetEntry(i);
             if(i % 100 == 0) cout << "event = " << i << endl;
@@ -647,15 +648,23 @@ void ReadTree()
             const bool cut2_run6064_am = cut2_ch0_run6064_am && cut2_ch1_run6064_am && cut2_ch2_run6064_am;
             const bool cut_run6064_am = cut1_run6064_am && cut2_run6064_am;
 
-            if(cut1_ch1_run6061_spe && cut2_ch1_run6061_spe && (max_abs_amp_ch1 < 6 && max_abs_amp_ch1 > 5) && (integral_ch1 < 0) )
+            if(true)
             {
-//                TPad *pad_cd = (TPad*)canv->GetListOfPrimitives()->FindObject("c_3");
+                TPad *pad_cd = (TPad*)canv->GetListOfPrimitives()->FindObject("c_3");
+                pad_cd->ls();
+
 //                TGraph *gh_cd = (TGraph*)pad_cd->GetListOfPrimitives()->FindObject("Graph");
-//                if (pad_cd == NULL)
-//                    cout << "pad_cd == NULL" << endl;
-//                if(gh_cd == NULL)
-//                    cout << "gh_cd == NULL" << endl;
-                Hlist_gr.Add( canv->Clone() );
+                 TGraph *gh_cd = (TGraph*)pad_cd->GetListOfPrimitives()->At(0);
+                 TGraph *gh_cd2 = (TGraph*)pad_cd->GetListOfPrimitives()->At(1);
+                if (pad_cd == NULL)
+                    cout << "pad_cd == NULL" << endl;
+                if(gh_cd == NULL)
+                    cout << "gh_cd == NULL" << endl;
+
+                TCanvas *canv_res = new TCanvas("c", "c", 0, 0, 1900, 1500);
+                gh_cd->Draw("apl");
+                gh_cd2->Draw("same pl");
+                Hlist_gr.Add( canv_res->Clone() );
             }
 
         }

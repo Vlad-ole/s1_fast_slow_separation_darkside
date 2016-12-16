@@ -21,7 +21,7 @@ void main_unfold()
 
     TChain chain("t1");
 
-    const int n_max = 1860;//number of files
+    const int n_max = 1830;//number of files
     for(int i = 0; i < n_max; i++)
     {
         ostringstream file_tree_oss;
@@ -108,24 +108,28 @@ void main_unfold()
 //        TCut cut = "(integral_ch2_unfold_total / 1484.0) > 10 && (integral_ch2_unfold_fast / integral_ch2_unfold_total) > 0.1 && (integral_ch2_unfold_fast / integral_ch2_unfold_total) < 0.6";
 
 
+        TCut cut1_ch0 = "(min_amp_ch0 > 200)";
+        TCut cut2_ch0 = "(min_amp_ch0_0_1920 > 4030) && (min_amp_ch0_0_1920 < 4050)";
 
-        TCut cut1 = "(min_amp_ch2 > 2250)";
-        TCut cut2 = "(min_amp_ch2_0_1800 > 3412) && (min_amp_ch2_0_1800 < 3430) && (min_amp_ch2_8000_15000 > 3300)";
-        TCut cut = cut1 && cut2;
+        TCut cut1_ch2 = "(min_amp_ch2 > 2250)";
+        TCut cut2_ch2 = "(min_amp_ch2_0_1800 > 3412) && (min_amp_ch2_0_1800 < 3430) && (min_amp_ch2_8000_15000 > 3300)";
+
 
 //        chain.Draw("integral_ch2_unfold_fast/integral_ch2_unfold_total>>hist(500, 0, 1)");
-//        chain.Draw("(integral_ch2_unfold_total / 1484.0)>>hist(500, -500, 8000)", cut);
-//        chain.Draw("(integral_ch0 / 587.9)>>hist(500, -200, 1500)");
+//        chain.Draw("(integral_ch2_unfold_total / 1484.0)>>hist(500, -500, 8000)", "");
+        chain.Draw("(integral_ch2 / 1484.0)>>hist(500, -100, 1000)", "");
+
+//        chain.Draw("(integral_ch0 / 587.9)>>hist(500, -200, 1500)", "");
 //        chain.Draw("(integral_ch0 / 587.9)");
 
 
-        chain.Draw("(integral_ch2_unfold_fast / integral_ch2_unfold_total):(integral_ch2_unfold_total / 1484.0) >>hist2(200, 0, 1000, 200, 0, 1)", cut, "COLz");
-        Double_t levels[] = {0, 2, 6, 10, 15, 20, 25, 30, 60, 100, 200};
-        hist2->SetContour((sizeof(levels)/sizeof(Double_t)), levels);
-        c1->SetLogz();
-        hist2->GetXaxis()->SetTitle("N_pe");
-        hist2->GetYaxis()->SetTitle("I_fast / I_total");
-        hist2->SetTitle("");
+//        chain.Draw("(integral_ch2_unfold_fast / integral_ch2_unfold_total):(integral_ch2_unfold_total / 1484.0) >>hist2(200, 0, 1000, 200, 0, 1)", cut, "COLz");
+//        Double_t levels[] = {0, 2, 6, 10, 15, 20, 25, 30, 60, 100, 200};
+//        hist2->SetContour((sizeof(levels)/sizeof(Double_t)), levels);
+//        c1->SetLogz();
+//        hist2->GetXaxis()->SetTitle("N_pe");
+//        hist2->GetYaxis()->SetTitle("I_fast / I_total");
+//        hist2->SetTitle("");
 
 
 

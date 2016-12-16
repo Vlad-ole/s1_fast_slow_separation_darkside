@@ -17,7 +17,8 @@ double phase(double x, double y)
 
 
 //I added normalization ( 1 / time_range), so you can't use this directly for ifft
-vector< vector<double> > Get_fft_amp_spectrum(vector<double> data, const double time_from, const double time_to, const double time_scale)
+vector< vector<double> > Get_fft_amp_spectrum(vector<double> data, const double time_from, const double time_to,
+                                              const double time_scale, const bool is_nomalizied)
 {
     const int point_start = (int)(time_from / time_scale);
     const int point_stop = (int)(time_to / time_scale);
@@ -54,14 +55,26 @@ vector< vector<double> > Get_fft_amp_spectrum(vector<double> data, const double 
     const double sampling_frequency = 1000.0 / time_scale;//MHz
     const double delta_frequency = sampling_frequency / n_size_raw;
 
-    for (int i = 0; i < n_size_fft; ++i)
+    if(is_nomalizied)
     {
-        fft_amp_spectrum[0][i] = i * delta_frequency;
-//        fft_amp_spectrum[1][i] = sqrt( fft_re[i]*fft_re[i] + fft_im[i]*fft_im[i] )
+        for (int i = 0; i < n_size_fft; ++i)
+        {
+            fft_amp_spectrum[0][i] = i * delta_frequency;
+            //        fft_amp_spectrum[1][i] = sqrt( fft_re[i]*fft_re[i] + fft_im[i]*fft_im[i] )
 
-        // I added normalization and delete sqrt! Be careful!
-        fft_amp_spectrum[1][i] = ( fft_re[i]*fft_re[i] + fft_im[i]*fft_im[i] ) / (time_to - time_from);
-        fft_amp_spectrum[2][i] = phase(fft_re[i], fft_im[i]);
+            // I added normalization and delete sqrt! Be careful!
+            fft_amp_spectrum[1][i] = ( fft_re[i]*fft_re[i] + fft_im[i]*fft_im[i] ) / (time_to - time_from);
+            fft_amp_spectrum[2][i] = phase(fft_re[i], fft_im[i]);
+        }
+    }
+    else
+    {
+        for (int i = 0; i < n_size_fft; ++i)
+        {
+            fft_amp_spectrum[0][i] = i * delta_frequency;
+            fft_amp_spectrum[1][i] = sqrt( fft_re[i]*fft_re[i] + fft_im[i]*fft_im[i] );
+            fft_amp_spectrum[2][i] = phase(fft_re[i], fft_im[i]);
+        }
     }
 
 
@@ -102,5 +115,6 @@ vector< vector<double> > Get_ifft(vector< vector<double> > fft_spectrum, int out
         result[1][i] = ( fft_back->GetPointReal(i) ) / output_size;
     }
 
+    delete fft_back;
     return result;
 }
